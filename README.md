@@ -1,6 +1,10 @@
 # axease
 Simple library for creating canvas parallax animations in Javascript.
 
+Demo
+------------
+
+[Demo1](http://studiouniver.se/github/axease/demo1.html)
 
 Instructions
 ------------
@@ -91,7 +95,9 @@ Code/Performance
 
 * Screens are not updated when they are not visible on the screen.
 
-* This is something I can keep an eye on. It's definitely not perfect right now.
+* I am polyfilling requestAnimationFrame
+
+* Performance is something I am keeping an eye on. It's definitely not perfect right now.
 
 * In this version the target FPS is 60fps. Most likely this will be reduced to a more mobile friendly 30fps in my next version.
 
