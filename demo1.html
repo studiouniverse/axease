@@ -1,0 +1,109 @@
+<html>
+<head>
+  <title>Axease</title>
+  <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/3.0.3/normalize.min.css">
+  <style>
+    section, canvas {
+      width: 100%;
+      height: auto;
+      background-color: #2e102c;
+    }
+    section {
+      display: block;
+      height: 40vh;
+      font-family: monospace;
+      font-weight: bold;
+      font-size: 18px;
+      background-color: rgb(124, 228, 247);
+    }
+    section:nth-child(odd) {
+      background-color: rgb(242, 91, 131);
+    }
+  </style>
+</head>
+<body>
+  <section>Keep scrolling</section>
+  <section>Keep scrolling</section>
+  <canvas id="one"></canvas>
+  <section>Keep scrolling</section>
+  <section>Keep scrolling</section>
+  <canvas id="two"></canvas>
+  <section></section>
+  <section></section>
+
+  <script type="text/javascript" src="solo.0.1.js"></script>
+  <script type="text/javascript" src="axease.0.1.js"></script>
+
+  <script>
+    // Create Axease
+    var ax = new Axease();
+
+    // Preload our content
+    _$.createImage([{
+      id: "bg",
+      url: "bokeh-bg.png"
+    }, {
+      id: "fg",
+      url: "bokeh-fg.png"
+    }], onload);
+
+    function onload() {
+      // Get "screen"s (canvas)
+      var screenOne = _$.getScreen("canvas#one");
+      var screenTwo = _$.getScreen("canvas#two");
+
+      var spriteHeight = (screenOne.canvas.width / _$.img["bg"].naturalWidth) * _$.img["bg"].naturalHeight;
+
+      // Push the screens (canvas) to Axease
+      ax.elements.push({
+        "screen": screenOne,
+        "sprites": [{
+          img: _$.img["bg"],
+          width: screenOne.canvas.width,
+          height: spriteHeight,
+          scroll: {
+            below: { y: 0.2 }, // 1 - bottom of canvas
+            center: { y: 0 }, // 0 - middle of canvas
+            above: { y: -0.2 } // -1 top of canvas
+          }
+        }, {
+          img: _$.img["fg"],
+          width: screenOne.canvas.width,
+          height: spriteHeight,
+          scroll: {
+            below: { y: 0.8 }, // 1 - bottom of canvas
+            center: { y: 0.4 }, // 0 - middle of canvas
+            above: { y: 0 } // -1 top of canvas
+          }
+        }]
+      });
+
+      ax.elements.push({
+        "screen": screenTwo,
+        "sprites": [{
+          img: _$.img["bg"],
+          width: screenOne.canvas.width,
+          height: spriteHeight,
+          scroll: {
+            below: { x: 0.2 }, // 1 - bottom of canvas
+            center: { x: 0 }, // 0 - middle of canvas
+            above: { x: -0.2 } // -1 top of canvas
+          }
+        }, {
+          img: _$.img["fg"],
+          width: screenOne.canvas.width,
+          height: spriteHeight,
+          scroll: {
+            below: { x: -0.8, y: 0.8 }, // 1 - bottom of canvas
+            center: { x: -0.4, y: 0.4 }, // 0 - middle of canvas
+            above: { x: 0, y: 0 } // -1 top of canvas
+          }
+        }]
+      });
+
+      // Start the tick!
+      _$.update();
+    }
+  </script>
+</body>
+</html>
