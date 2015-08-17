@@ -5,25 +5,33 @@ var Axease = function() {
 
   self.update = function() {
     self.elements.forEach(function(item) {
-      if (_$.elOnScreen(item.screen.canvas)) {
+      if (_$.isElVisible(item.screen.canvas)) {
         // Canvas visible
         item.screen.context.clearRect(0, 0, item.screen.canvas.width, item.screen.canvas.height);
+
+        var canvasData = {
+          canvas: item.screen.canvas,
+          context: item.screen.context,
+          top: _$.getElTop(item.screen.canvas),
+          halfWidth: item.screen.canvas.width * 0.5,
+          halfHeight: item.screen.canvas.height * 0.5
+        }
 
         item.sprites.forEach(function(sprite) {
           var result = {};
 
           if (sprite.scroll) {
-            result = self.scrollAnimation(sprite, item.screen.context);
+            result = self.scrollAnimation(sprite, canvasData);
           } else if (sprite.mouse) {
 
           } else if (sprite.time) {
-            result = self.timeAnimation(sprite, item.screen.context);
+            result = self.timeAnimation(sprite, canvasData);
           }
 
           item.screen.context.drawImage(
             self.currentFrame(sprite),
-            result.x + (item.screen.canvas.width / 2) - (sprite.width / 2),
-            result.y + (item.screen.canvas.height / 2) - (sprite.height / 2),
+            result.x + canvasData.halfWidth - (sprite.width / 2),
+            result.y + canvasData.halfHeight  - (sprite.height / 2),
             sprite.width || sprite.img.naturalWidth,
             sprite.height || sprite.img.naturalHeight
           );
@@ -79,12 +87,11 @@ var Axease = function() {
     return sprite.animation.canvas;
   }
 
-  self.timeAnimation = function(sprite, context) {
-    // All time animations are ping pong
-    var canvas = context.canvas;
-
-    var halfCanvasWidth = canvas.width * 0.5;
-    var halfCanvasHeight = canvas.height * 0.5;
+  self.timeAnimation = function(sprite, canvasData) {
+    var canvas = canvasData.canvas;
+    var context = canvasData.context;
+    var halfCanvasWidth = canvasData.halfWidth;
+    var halfCanvasHeight = canvasData.halfHeight;
 
     var currAnimation = sprite.time;
 
@@ -102,8 +109,7 @@ var Axease = function() {
       currAnimation.targetY = currAnimation.currentY;
     }
 
-    if (
-      (currAnimation.travelledX >= currAnimation.distanceX &&
+    if ( (currAnimation.travelledX >= currAnimation.distanceX &&
       currAnimation.travelledY >= currAnimation.distanceY) ||
       (currAnimation.currentX == currAnimation.targetX &&
       sprite.time.currentY >= currAnimation.targetY)
@@ -159,13 +165,13 @@ var Axease = function() {
 
   }
 
-  self.scrollAnimation = function(sprite, context) {
-    var canvas = context.canvas;
+  self.scrollAnimation = function(sprite, canvasData) {
+    var canvas = canvasData.canvas;
+    var context = canvasData.context;
+    var halfCanvasWidth = canvasData.halfWidth;
+    var halfCanvasHeight = canvasData.halfHeight;
 
-    var halfCanvasWidth = canvas.width * 0.5;
-    var halfCanvasHeight = canvas.height * 0.5;
-
-    var deltaY = (_$.scrollY + (_$.screenHeight * 0.5)) - (_$.elGetTop(canvas) + (canvas.offsetHeight * 0.5));
+    var deltaY = (_$.scrollY + (_$.screenHeight * 0.5)) - (canvasData.top + (canvas.offsetHeight * 0.5));
 
     var direction = deltaY < 0 ? "below" : (deltaY > 0) ? "above" : "center";
 

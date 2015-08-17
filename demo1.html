@@ -24,15 +24,20 @@
 <body>
   <section>Keep scrolling</section>
   <section>Keep scrolling</section>
-  <canvas id="one"></canvas>
+  <canvas id="one" width="600" height="315"></canvas>
   <section>Keep scrolling</section>
   <section>Keep scrolling</section>
-  <canvas id="two"></canvas>
+  <canvas id="two" width="600" height="315"></canvas>
+  <section></section>
+  <section></section>
+  <canvas id="three" width="600" height="315"></canvas>
+  <section></section>
+  <section></section>
+  <canvas id="four" width="600" height="315"></canvas>
   <section></section>
   <section></section>
 
-  <script type="text/javascript" src="solo.0.1.js"></script>
-  <script type="text/javascript" src="axease.0.1.js"></script>
+  <script type="text/javascript" src="build/axease.solo.0.2.js"></script>
 
   <script>
     // Create Axease
@@ -51,6 +56,8 @@
       // Get "screen"s (canvas)
       var screenOne = _$.getScreen("canvas#one");
       var screenTwo = _$.getScreen("canvas#two");
+      var screenThree = _$.getScreen("canvas#three");
+      var screenFour = _$.getScreen("canvas#four");
 
       var spriteHeight = (screenOne.canvas.width / _$.img["bg"].naturalWidth) * _$.img["bg"].naturalHeight;
 
@@ -78,6 +85,7 @@
         }]
       });
 
+      // Scroll animation
       ax.elements.push({
         "screen": screenTwo,
         "sprites": [{
@@ -101,8 +109,38 @@
         }]
       });
 
+      // Time animation
+      ax.elements.push({
+        "screen": screenThree,
+        "sprites": [{
+          img: _$.img["bg"],
+          width: screenOne.canvas.width,
+          height: spriteHeight,
+          time: {
+            pingpong: false,
+            duration: 10, //s
+            frames: [[2.0, 0], [-2.0, 0]]
+          }
+        }]
+      });
+
+      // PingPong animation
+      ax.elements.push({
+        "screen": screenFour,
+        "sprites": [{
+          img: _$.img["bg"],
+          width: screenOne.canvas.width,
+          height: spriteHeight,
+          time: {
+            pingpong: true,
+            duration: 10, //s
+            frames: [[2.0, 0], [-2.0, 0]]
+          }
+        }]
+      });
+
       // Start the tick!
-      _$.update();
+      _$.start();
     }
   </script>
 </body>
