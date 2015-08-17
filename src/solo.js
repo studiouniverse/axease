@@ -78,6 +78,8 @@ if (!window.requestAnimationFrame) { window.requestAnimationFrame = (function() 
 
   // Screen
   _$.scrollY = 0;
+  _$.niceY = 0;
+  _$.scrolled = false;
   _$.resize = false; // Has a resize happened ?
   _$.screenWidth = 0; // Screen width
   _$.screenHeight = 0; // Screen height
@@ -103,7 +105,10 @@ if (!window.requestAnimationFrame) { window.requestAnimationFrame = (function() 
 
       // Scroll
       var scroll = window.scrollY || window.pageYOffset || document.documentElement.scrollTop;
+      _$.scrolled = scroll !== _$.scrollY;
       _$.scrollY = scroll;
+
+      _$.niceY = _$.scrollY / (document.body.offsetHeight - _$.screenHeight);
 
       // Run updates
       _$.accumulator += _$.passed;
