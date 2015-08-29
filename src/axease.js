@@ -3,8 +3,24 @@ var Axease = function() {
 
   self.elements = [];
 
-  self.addScreen = function(updateFunc) {
-    self.elements.push(updateFunc)
+  self.addScreen = function(screenData) {
+    if (typeof(screenData.screen) == "string") {
+      screenData.screen = _$.getScreen(screenData.screen);
+    }
+    if (screenData.sprites) {
+      screenData.sprites.forEach(function(spriteData){
+        if (typeof(spriteData.spriteId) == "string") {
+          spriteData.img = _$.img[spriteData.spriteId];
+        }
+        if (!spriteData.width) {
+          spriteData.width = screenData.screen.canvas.width;
+        }
+        if (!spriteData.height) {
+          spriteData.height = (screenData.screen.canvas.width / spriteData.img.naturalWidth) * spriteData.img.naturalHeight;
+        }
+      });
+    }
+    self.elements.push(screenData);
     _$.update(true);
   }
 

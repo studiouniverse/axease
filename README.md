@@ -4,6 +4,7 @@ Simple library for creating canvas parallax animations in Javascript.
 Demo
 ------------
 
+Demo is WIP. Much nicer version soon!
 [Demo 1](http://studiouniver.se/github/axease/demo1.html)
 
 Instructions
@@ -40,34 +41,29 @@ You need to create an instance of Axease and preload your assets. Assets get add
       url: "bokeh-fg.png"
     }], onload);
 
-The magic should happen in your onload function. First select your screen (canvas). Then build up and push your screen animation object. A screen animation object consists of; the screen; the sprites (images) to draw.
+The magic should happen in your onload function. First select your screen (canvas). Then build up and push your screen animation object. A screen animation object consists of; the screen; the sprites (images) to draw; and the animation to apply.
 
 For scroll animations each of your sprite objects should have a 'scroll' object. This has three attributes: "below", "center", "above". Below refers to the location sprites should be when the screen is below the center of the window (window.innerHeight / 2), and above defines the location of the sprites as the screen gets closer to the top of the window.
+
+Sprite objects have an optional width & height properties. I think the defaults values are a good place to start though.
 
 Instead of hard pixel values I use a (-1 -> 1) co-ordinate value. When adjusting the y values, -1 is the top of your screen and 1 is the bottom. I don't really have any plans to change this, I really like the simplicity!
 
     function onload() {
-      // Get "screen"s (canvas)
-      var screenOne = _$.getScreen("canvas#one");
 
-      var spriteHeight = (screenOne.canvas.width / _$.img["bg"].naturalWidth) * _$.img["bg"].naturalHeight;
 
       // Push the screens (canvas) to Axease
       ax.addElement({
-        "screen": screenOne,
+        "screen": "#one", // Canvas selector
         "sprites": [{
-          img: _$.img["bg"],
-          width: screenOne.canvas.width,
-          height: spriteHeight,
+          spriteId: "bg",
           scroll: {
             below: { y: 0.2 }, // 1 - bottom of canvas
             center: { y: 0 }, // 0 - middle of canvas
             above: { y: -0.2 } // -1 top of canvas
           }
         }, {
-          img: _$.img["fg"],
-          width: screenOne.canvas.width,
-          height: spriteHeight,
+          spriteId: "fg",
           scroll: {
             below: { x: -0.8, y: 0.8 }, // 1 - right/bottom of canvas
             center: { x: -0.4, y: 0.4 }, // 0 - middle of canvas
@@ -83,11 +79,9 @@ Axease also supports time based animations. Again, I think they are quite simple
 A time animation object has a duration (in seconds). This is how long it should take to transition between each frame, not how long to complete an animation cycle! Frames are an array of x,y values (using the -1,1 values). There is also a pingpong attribute; when true the animation will transition back to the first frame, rather than instantly snapping to it.
 
       ax.addScreen({
-        "screen": screenFour,
+        "screen": "#four",
         "sprites": [{
-          img: _$.img["bg"],
-          width: screenOne.canvas.width,
-          height: spriteHeight,
+          spriteId: "bg",
           time: {
             pingpong: true,
             duration: 10, //s
