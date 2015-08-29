@@ -4,6 +4,7 @@ if (!window.requestAnimationFrame) { window.requestAnimationFrame = (function() 
 (function(scope){
   if (scope._$) return;
   scope._$ = {};
+  var _$ = scope._$;
 
   _$.f = function(query) {
     return document.querySelectorAll(query);
@@ -73,7 +74,8 @@ if (!window.requestAnimationFrame) { window.requestAnimationFrame = (function() 
   _$.dt = 1000 / _$.fps;
 
   //
-  _$.updates = []; // Holds all the updates to run per tick
+  _$.updates = []; // Holds all the updates to run @fps
+  _$.draws = []; // Holds all the draw updates to run once per tick
   _$.accumulator = 0;
 
   // Screen
@@ -91,8 +93,28 @@ if (!window.requestAnimationFrame) { window.requestAnimationFrame = (function() 
     _$.update();
   }
 
-  _$.update = function() {
+  _$.addUpdate = function(updateFunc, drawFunc) {
+    if (updateFunc) _$.updates.push(updateFunc);
+    if (drawFunc) _$.draws.push(drawFunc);
+    _$.update(true);
+  }
+
+  _$._runUpdates = function() {
+    _$.updates.forEach(function(func, index) {
+      func(_$.dt);
+    });
+  }
+
+  _$._runDraw = function() {
+    _$.draws.forEach(function(func, index) {
+      func(_$.dt);
+    });
+  }
+
+  _$.update = function(force) {
     requestAnimationFrame(function() {
+      if (_$.updating) return;
+
       // Time
       var now = Date.now();
       _$.time = now;
@@ -111,13 +133,18 @@ if (!window.requestAnimationFrame) { window.requestAnimationFrame = (function() 
       _$.niceY = _$.scrollY / (document.body.offsetHeight - _$.screenHeight);
 
       // Run updates
-      _$.accumulator += _$.passed;
-      while (_$.accumulator >= _$.dt) {
-        _$.updates.forEach(function(func) {
-          func(_$.dt);
-        });
-        _$.accumulator -= _$.dt;
+      if (!force) {
+        _$.accumulator += _$.passed;
+        while (_$.accumulator >= _$.dt) {
+          _$._runUpdates();
+          _$.accumulator -= _$.dt;
+        }
+      } else {
+        _$.scrolled = true;
+        _$._runUpdates();
       }
+
+      _$._runDraw();
 
       // Prep next tick
       _$.prevTime = now;

@@ -53,7 +53,7 @@ Instead of hard pixel values I use a (-1 -> 1) co-ordinate value. When adjusting
       var spriteHeight = (screenOne.canvas.width / _$.img["bg"].naturalWidth) * _$.img["bg"].naturalHeight;
 
       // Push the screens (canvas) to Axease
-      ax.elements.push({
+      ax.addElement({
         "screen": screenOne,
         "sprites": [{
           img: _$.img["bg"],
@@ -82,7 +82,7 @@ Axease also supports time based animations. Again, I think they are quite simple
 
 A time animation object has a duration (in seconds). This is how long it should take to transition between each frame, not how long to complete an animation cycle! Frames are an array of x,y values (using the -1,1 values). There is also a pingpong attribute; when true the animation will transition back to the first frame, rather than instantly snapping to it.
 
-      ax.elements.push({
+      ax.addScreen({
         "screen": screenFour,
         "sprites": [{
           img: _$.img["bg"],
@@ -113,13 +113,13 @@ Code/Performance
 
 * The global scope should only be getting polluted by _$ and Axease.
 
-* Screens are not updated when they are not visible on the screen.
+* Screens are only updated when they need to be.
 
 * I am polyfilling requestAnimationFrame
 
 * You can change target fps by modifying _$.fps (default is 24 right now)
 
-* There are still a number of optimisations to make, particularly with seperating the drawing and updating logic.
+* There's always more optimisations to make...
 
 Future
 ------

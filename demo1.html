@@ -1,6 +1,6 @@
 <html>
 <head>
-  <title>Axease</title>
+  <title>Axease - Demo 1</title>
   <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/3.0.3/normalize.min.css">
   <style>
     section, canvas {
@@ -37,7 +37,9 @@
   <section></section>
   <section></section>
 
-  <script type="text/javascript" src="build/axease.solo.0.2.js"></script>
+  <script type="text/javascript" src="src/solo.js"></script>
+  <script type="text/javascript" src="src/axease.js"></script>
+  <!-- <script type="text/javascript" src="build/axease.solo.0.2.js"></script> -->
 
   <script>
     // Create Axease
@@ -62,7 +64,7 @@
       var spriteHeight = (screenOne.canvas.width / _$.img["bg"].naturalWidth) * _$.img["bg"].naturalHeight;
 
       // Push the screens (canvas) to Axease
-      ax.elements.push({
+      ax.addScreen({
         "screen": screenOne,
         "sprites": [{
           img: _$.img["bg"],
@@ -86,7 +88,7 @@
       });
 
       // Scroll animation
-      ax.elements.push({
+      ax.addScreen({
         "screen": screenTwo,
         "sprites": [{
           img: _$.img["bg"],
@@ -110,7 +112,7 @@
       });
 
       // Time animation
-      ax.elements.push({
+      ax.addScreen({
         "screen": screenThree,
         "sprites": [{
           img: _$.img["bg"],
@@ -125,7 +127,7 @@
       });
 
       // PingPong animation
-      ax.elements.push({
+      ax.addScreen({
         "screen": screenFour,
         "sprites": [{
           img: _$.img["bg"],

@@ -3,11 +3,27 @@ var Axease = function() {
 
   self.elements = [];
 
+  self.addScreen = function(updateFunc) {
+    self.elements.push(updateFunc)
+    _$.update(true);
+  }
+
+  self.draw = function() {
+    self.elements.forEach(function(item) {
+      if (item.draw) {
+        item.screen.context.clearRect(0, 0, item.screen.canvas.width, item.screen.canvas.height);
+        item.draw.forEach(function(drawFunc) {
+          drawFunc();
+        })
+      }
+    });
+  }
+
   self.update = function() {
     self.elements.forEach(function(item) {
+      item.draw = false;
       if (_$.isElVisible(item.screen.canvas)) {
         // Canvas visible
-        item.screen.context.clearRect(0, 0, item.screen.canvas.width, item.screen.canvas.height);
 
         var canvasData = {
           canvas: item.screen.canvas,
@@ -18,23 +34,33 @@ var Axease = function() {
         }
 
         item.sprites.forEach(function(sprite) {
-          var result = {};
+          var result;
 
-          if (sprite.scroll) {
+          if (sprite.scroll && _$.scrolled) {
             result = self.scrollAnimation(sprite, canvasData);
           } else if (sprite.mouse) {
-
+            result = self.mouseAnimation(sprite, canvasData);
           } else if (sprite.time) {
             result = self.timeAnimation(sprite, canvasData);
           }
 
-          item.screen.context.drawImage(
-            self.currentFrame(sprite),
-            result.x + canvasData.halfWidth - (sprite.width / 2),
-            result.y + canvasData.halfHeight  - (sprite.height / 2),
-            sprite.width || sprite.img.naturalWidth,
-            sprite.height || sprite.img.naturalHeight
-          );
+          if (!result) {
+            return;
+          }
+
+          if (!item.draw) {
+            item.draw = [];
+          }
+
+          item.draw.push(function() {
+            item.screen.context.drawImage(
+              self.currentFrame(sprite),
+              result.x + canvasData.halfWidth - (sprite.width / 2),
+              result.y + canvasData.halfHeight  - (sprite.height / 2),
+              sprite.width || sprite.img.naturalWidth,
+              sprite.height || sprite.img.naturalHeight
+            );
+          });
         });
       }
     });
@@ -161,7 +187,7 @@ var Axease = function() {
     return { x: currAnimation.currentX, y: currAnimation.currentY }
   }
 
-  self.mouseAnimation = function() {
+  self.mouseAnimation = function(sprite, canvasData) {
 
   }
 
@@ -211,7 +237,8 @@ var Axease = function() {
 
     return { x: x, y: y }
   }
-  _$.updates.push(self.update);
+
+  _$.addUpdate(self.update, self.draw);
 
   return self;
 }
