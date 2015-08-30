@@ -42,9 +42,6 @@
   <!-- <script type="text/javascript" src="build/axease.solo.0.2.js"></script> -->
 
   <script>
-    // Create Axease
-    var ax = new Axease();
-
     // Preload our content
     _$.createImage([{
       id: "bg",
@@ -56,27 +53,28 @@
 
     function onload() {
       // Push the screens (canvas) to Axease
-      ax.addScreen({
+      _$.ax.addScreen({
         "screen": "#one",
         "sprites": [{
           spriteId: "bg",
+          // dither: true,
           scroll: {
             below: { y: 0.2 }, // 1 - bottom of canvas
             center: { y: 0 }, // 0 - middle of canvas
             above: { y: -0.2 } // -1 top of canvas
           }
-        }, {
+        } /* , {
           spriteId: "fg",
           scroll: {
             below: { y: 0.8 }, // 1 - bottom of canvas
             center: { y: 0.4 }, // 0 - middle of canvas
             above: { y: 0 } // -1 top of canvas
           }
-        }]
+        }*/ ]
       });
 
       // Scroll animation
-      ax.addScreen({
+      _$.ax.addScreen({
         "screen": "#two",
         "sprites": [{
           spriteId: "bg",
@@ -96,7 +94,7 @@
       });
 
       // Time animation
-      ax.addScreen({
+      _$.ax.addScreen({
         "screen": "#three",
         "sprites": [{
           spriteId: "bg",
@@ -109,7 +107,7 @@
       });
 
       // PingPong animation
-      ax.addScreen({
+      _$.ax.addScreen({
         "screen": "#four",
         "sprites": [{
           spriteId: "bg",

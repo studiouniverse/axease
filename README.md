@@ -27,10 +27,7 @@ I'm not sure if this is essential, but I would fully recommend including this CS
       height: auto;
     }
 
-You need to create an instance of Axease and preload your assets. Assets get added to the _$.img object with the id supplied:
-
-    // Create Axease
-    var ax = new Axease();
+You should preload all your image assets. Assets get added to the _$.img object using the id supplied:
 
     // Preload our content
     _$.createImage([{
@@ -53,7 +50,7 @@ Instead of hard pixel values I use a (-1 -> 1) co-ordinate value. When adjusting
 
 
       // Push the screens (canvas) to Axease
-      ax.addElement({
+      _$.ax.addElement({
         "screen": "#one", // Canvas selector
         "sprites": [{
           spriteId: "bg",
@@ -78,7 +75,7 @@ Axease also supports time based animations. Again, I think they are quite simple
 
 A time animation object has a duration (in seconds). This is how long it should take to transition between each frame, not how long to complete an animation cycle! Frames are an array of x,y values (using the -1,1 values). There is also a pingpong attribute; when true the animation will transition back to the first frame, rather than instantly snapping to it.
 
-      ax.addScreen({
+      _$.ax.addScreen({
         "screen": "#four",
         "sprites": [{
           spriteId: "bg",
@@ -105,7 +102,7 @@ Code/Performance
 
 * I do not use any onScroll events.
 
-* The global scope should only be getting polluted by _$ and Axease.
+* The global scope should only be getting polluted by _$.
 
 * Screens are only updated when they need to be.
 

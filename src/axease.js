@@ -1,4 +1,4 @@
-var Axease = function() {
+_$.ax = (function() {
   var self = this;
 
   self.elements = [];
@@ -17,6 +17,9 @@ var Axease = function() {
         }
         if (!spriteData.height) {
           spriteData.height = (screenData.screen.canvas.width / spriteData.img.naturalWidth) * spriteData.img.naturalHeight;
+        }
+        if (!spriteData.dy) {
+          spriteData.dy = 100 / _$.fps;
         }
       });
     }
@@ -52,12 +55,42 @@ var Axease = function() {
         item.sprites.forEach(function(sprite) {
           var result;
 
-          if (sprite.scroll && _$.scrolled) {
+          if (sprite.scroll /* && _$.scrolled */) {
             result = self.scrollAnimation(sprite, canvasData);
+            if (sprite.dither) {
+              sprite.targetY = result.y;
+            }
           } else if (sprite.mouse) {
             result = self.mouseAnimation(sprite, canvasData);
           } else if (sprite.time) {
             result = self.timeAnimation(sprite, canvasData);
+          }
+
+          if (result && sprite.hasOwnProperty("targetY")) {
+            if (!sprite.hasOwnProperty("y")) {
+              sprite.y = result.y;
+            } else {
+              var dy = sprite.dy;
+              if (sprite.targetY > sprite.y) {
+                if (sprite.y + dy > sprite.targetY) {
+                  sprite.y = sprite.targetY;
+                } else {
+                  sprite.y += dy;
+                }
+              } else if (sprite.targetY < sprite.y) {
+                if (sprite.y - dy < sprite.targetY) {
+                  sprite.y = sprite.targetY;
+                } else {
+                  sprite.y -= dy;
+                }
+              }
+
+              if (sprite.targetY == sprite.y) {
+                delete sprite.targetY;
+              }
+
+              result.y = sprite.y;
+            }
           }
 
           if (!result) {
@@ -257,4 +290,4 @@ var Axease = function() {
   _$.addUpdate(self.update, self.draw);
 
   return self;
-}
+})();
