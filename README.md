@@ -10,9 +10,9 @@ Demo is WIP. Much nicer version soon!
 Instructions
 ------------
 
-The following are some basic instructions, which will most likely change as I improve things. Please refer to demo1.html for a full working example.
+The following are some basic instructions, which will most likely change as I improve things. Please refer to demo1.html for a fully coded example.
 
-You need to include axease:
+You need to include the Axease library:
 
     <script type="text/javascript" src="js/axease.solo.0.2.js"></script>
 
@@ -20,14 +20,14 @@ You need to have a <canvas> element in the page. A number of my functions will r
 
     <canvas id="one"></canvas>
 
-I'm not sure if this is essential, but I would fully recommend including this CSS. (This should cause most browsers to resize canvas elements the same was as image elements):
+Although not essential, in most cases I would recommend including this CSS. Most browsers should resize canvas elements the same way they do image elements:
 
     canvas {
       width: 100%;
       height: auto;
     }
 
-You should preload all your image assets. Assets get added to the _$.img object using the id supplied:
+You should preload all your image assets. Assets get added to the _$.img object using the id supplied. Be sure to include a callback:
 
     // Preload our content
     _$.createImage([{
@@ -38,16 +38,17 @@ You should preload all your image assets. Assets get added to the _$.img object 
       url: "bokeh-fg.png"
     }], onload);
 
-The magic should happen in your onload function. First select your screen (canvas). Then build up and push your screen animation object. A screen animation object consists of; the screen; the sprites (images) to draw; and the animation to apply.
+The magic should happen in your onload function. A screen animation object consists of; the screen (valid query selector for your canvas); the sprites (images) to draw; and the animation to apply.
 
-For scroll animations each of your sprite objects should have a 'scroll' object. This has three attributes: "below", "center", "above". Below refers to the location sprites should be when the screen is below the center of the window (window.innerHeight / 2), and above defines the location of the sprites as the screen gets closer to the top of the window.
+For scroll animations each of your sprites should have a 'scroll' property. This has three attributes: "below", "center", and "above".
 
-Sprite objects have an optional width & height properties. I think the defaults values are a good place to start though.
+"Below" refers to the location a sprite should be when the screen is below the center of the window (window.innerHeight / 2), and "above" defines the location of the sprite as the screen gets closer to the top of the window.
 
-Instead of hard pixel values I use a (-1 -> 1) co-ordinate value. When adjusting the y values, -1 is the top of your screen and 1 is the bottom. I don't really have any plans to change this, I really like the simplicity!
+Sprite objects have optional width & height properties. I think the default values are a good place to start though.
+
+Instead of hard pixel values I use a (-1 -> 1) co-ordinate value. When adjusting the y values, -1 is the top of your screen and 1 is the bottom. I think that keeps things simple!
 
     function onload() {
-
 
       // Push the screens (canvas) to Axease
       _$.ax.addElement({
@@ -71,9 +72,9 @@ Instead of hard pixel values I use a (-1 -> 1) co-ordinate value. When adjusting
 
       ...
 
-Axease also supports time based animations. Again, I think they are quite simple to setup because of the co-ordinate system. Instead of a .scroll attribute, use .time.
+Axease also supports time based animations. Again, I think they are quite simple to setup because of the co-ordinate system. Instead of a .scroll property, use .time.
 
-A time animation object has a duration (in seconds). This is how long it should take to transition between each frame, not how long to complete an animation cycle! Frames are an array of x,y values (using the -1,1 values). There is also a pingpong attribute; when true the animation will transition back to the first frame, rather than instantly snapping to it.
+A time animation object has a duration (in seconds). This is how long it should take to transition between each frame, not how long to complete an animation cycle! Frames are an array of x,y values (using -1,1 co-ordinates). There is also a pingpong attribute - when true the animation will transition back to the first frame, rather than instantly snapping to it.
 
       _$.ax.addScreen({
         "screen": "#four",
@@ -87,7 +88,7 @@ A time animation object has a duration (in seconds). This is how long it should 
         }]
       });
 
-Finally, make sure you start the logic tick by running _$.start(). Ideally, do this when you are happy all your screen animation objects have been pushed, and your assets have loaded.
+Finally, make sure you start the update tick by running _$.start(). Ideally, do this when you are happy all your screen animation objects have been pushed, and your assets have finished loading.
 
     function onload() {
       // Your animations here
