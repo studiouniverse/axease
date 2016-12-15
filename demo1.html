@@ -10,7 +10,8 @@
     }
     section {
       display: block;
-      height: 40vh;
+      min-height: 40vh;
+      overflow: hidden;
       font-family: monospace;
       font-weight: bold;
       font-size: 18px;
@@ -22,8 +23,11 @@
   </style>
 </head>
 <body>
-  <section>Keep scrolling</section>
-  <section>Keep scrolling</section>
+  <section>
+    <p>Keep scrolling</p>
+    <figure><img src="http://lorempixel.com/g/720/720/cats/Placeholder/"/></figure>
+  </section>
+  <section id="scrolly">Keep scrolling</section>
   <canvas id="one" width="600" height="315"></canvas>
   <section>Keep scrolling</section>
   <section>Keep scrolling</section>
@@ -39,89 +43,25 @@
 
   <script type="text/javascript" src="src/solo.js"></script>
   <script type="text/javascript" src="src/axease.js"></script>
-  <!-- <script type="text/javascript" src="build/axease.solo.0.2.js"></script> -->
 
   <script>
-    // Preload our content
-    _$.createImage([{
-      id: "bg",
-      url: "bokeh-bg.png"
-    }, {
-      id: "fg",
-      url: "bokeh-fg.png"
-    }], onload);
-
-    function onload() {
-      // Push the screens (canvas) to Axease
-      _$.ax.addScreen({
-        "screen": "#one",
-        "sprites": [{
-          spriteId: "bg",
-          // dither: true,
-          scroll: {
-            below: { y: 0.2 }, // 1 - bottom of canvas
-            center: { y: 0 }, // 0 - middle of canvas
-            above: { y: -0.2 } // -1 top of canvas
-          }
-        } /* , {
-          spriteId: "fg",
-          scroll: {
-            below: { y: 0.8 }, // 1 - bottom of canvas
-            center: { y: 0.4 }, // 0 - middle of canvas
-            above: { y: 0 } // -1 top of canvas
-          }
-        }*/ ]
-      });
-
-      // Scroll animation
-      _$.ax.addScreen({
-        "screen": "#two",
-        "sprites": [{
-          spriteId: "bg",
-          scroll: {
-            below: { x: 0.2 }, // 1 - bottom of canvas
-            center: { x: 0 }, // 0 - middle of canvas
-            above: { x: -0.2 } // -1 top of canvas
-          }
-        }, {
-          spriteId: "fg",
-          scroll: {
-            below: { x: -0.8, y: 0.8 }, // 1 - bottom of canvas
-            center: { x: -0.4, y: 0.4 }, // 0 - middle of canvas
-            above: { x: 0, y: 0 } // -1 top of canvas
-          }
-        }]
-      });
-
-      // Time animation
-      _$.ax.addScreen({
-        "screen": "#three",
-        "sprites": [{
-          spriteId: "bg",
-          time: {
-            pingpong: false,
-            duration: 10, //s
-            frames: [[2.0, 0], [-2.0, 0]]
-          }
-        }]
-      });
-
-      // PingPong animation
-      _$.ax.addScreen({
-        "screen": "#four",
-        "sprites": [{
-          spriteId: "bg",
-          time: {
-            pingpong: true,
-            duration: 10, //s
-            frames: [[2.0, 0], [-2.0, 0]]
-          }
-        }]
-      });
-
-      // Start the tick!
-      _$.start();
-    }
+    var moveEl = $("section figure");
+    $.ax.addScrollAnimation({
+      containerEl: $("section#scrolly"),
+      visibleEl: moveEl,
+      relativeTo: 'viewport',
+      update: function(relativeY) {
+        var y = 60, startY = 0;
+        var newY = Math.min(0, startY + (y * relativeY));
+        moveEl.style.transform = "translateY(" + newY + "px)";
+      },
+      onEnter: function() {
+        $.log("Enter");
+      },
+      onExit: function() {
+        $.log("Exit");
+      }
+    });
   </script>
 </body>
 </html>

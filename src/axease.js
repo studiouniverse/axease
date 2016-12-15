@@ -1,293 +1,112 @@
-_$.ax = (function() {
+(function(scope, _ax) {
   var self = this;
+  var $ = window.___$solo;
+  $[_ax] = self;
 
-  self.elements = [];
+  // -- Scrolling
 
-  self.addScreen = function(screenData) {
-    if (typeof(screenData.screen) == "string") {
-      screenData.screen = _$.getScreen(screenData.screen);
+  self._scrollAnimations = [];
+
+  self.addScrollAnimation = function(animationData) {
+    if (!animationData || !animationData.containerEl) {
+      return;
     }
-    if (screenData.sprites) {
-      screenData.sprites.forEach(function(spriteData){
-        if (typeof(spriteData.spriteId) == "string") {
-          spriteData.img = _$.img[spriteData.spriteId];
-        }
-        if (!spriteData.width) {
-          spriteData.width = screenData.screen.canvas.width;
-        }
-        if (!spriteData.height) {
-          spriteData.height = (screenData.screen.canvas.width / spriteData.img.naturalWidth) * spriteData.img.naturalHeight;
-        }
-        if (!spriteData.dy) {
-          spriteData.dy = 100 / _$.fps;
-        }
-      });
-    }
-    self.elements.push(screenData);
-    _$.update(true);
-  }
 
-  self.draw = function() {
-    self.elements.forEach(function(item) {
-      if (item.draw) {
-        item.screen.context.clearRect(0, 0, item.screen.canvas.width, item.screen.canvas.height);
-        item.draw.forEach(function(drawFunc) {
-          drawFunc();
-        })
+    var animation = {
+      relativeTo: animationData.relativeTo || "viewport",
+
+      containerEl: animationData.containerEl,
+      containerPosition: "",
+      containerVisibility: null,
+
+      onCenter: animationData.onCenter,
+      onEnter: animationData.onEnter,
+      onExit: animationData.onExit
+    };
+
+    var updateID = $.addUpdate({
+      requirements: {
+        scrolled: true,
+        visible: animationData.visibleEl
+      },
+      preUpdate: function() {
+        var a = animationData;
+        var el = a.containerEl;
+        var visibility = el.isVisible();
+
+        if (typeof(a.onEnter) === "function") {
+          if (visibility && a.containerVisibility !== visibility) {
+            a.onEnter();
+          }
+        }
+
+        if (typeof(a.onExit) === "function") {
+          if (!visibility && a.containerVisibility !== visibility) {
+            a.onExit();
+          }
+        }
+
+        a.containerVisibility = visibility;
+      },
+      draw: function() {
+        var relativeY = self._updateScrollAnimation(animation);
+        animationData.update(relativeY);
       }
     });
+
+    animation.updateID = updateID;
+
+    self._scrollAnimations.push(animation);
   }
 
-  self.update = function() {
-    self.elements.forEach(function(item) {
-      item.draw = false;
-      if (_$.isElVisible(item.screen.canvas)) {
-        // Canvas visible
+  self._updateScrollAnimation = function(a) {
+    var el = a.containerEl;
 
-        var canvasData = {
-          canvas: item.screen.canvas,
-          context: item.screen.context,
-          top: _$.getElTop(item.screen.canvas),
-          halfWidth: item.screen.canvas.width * 0.5,
-          halfHeight: item.screen.canvas.height * 0.5
-        }
+    var top = el.getTop();
+    var bounds = el.getBounds();
 
-        item.sprites.forEach(function(sprite) {
-          var result;
+    var elWidth = bounds.width;
+    var elHeight = bounds.height;
 
-          if (sprite.scroll /* && _$.scrolled */) {
-            result = self.scrollAnimation(sprite, canvasData);
-            if (sprite.dither) {
-              sprite.targetY = result.y;
-            }
-          } else if (sprite.mouse) {
-            result = self.mouseAnimation(sprite, canvasData);
-          } else if (sprite.time) {
-            result = self.timeAnimation(sprite, canvasData);
-          }
+    var halfElWidth = elWidth * 0.5;
+    var halfElHeight = elHeight * 0.5;
 
-          if (result && sprite.hasOwnProperty("targetY")) {
-            if (!sprite.hasOwnProperty("y")) {
-              sprite.y = result.y;
-            } else {
-              var dy = sprite.dy;
-              if (sprite.targetY > sprite.y) {
-                if (sprite.y + dy > sprite.targetY) {
-                  sprite.y = sprite.targetY;
-                } else {
-                  sprite.y += dy;
-                }
-              } else if (sprite.targetY < sprite.y) {
-                if (sprite.y - dy < sprite.targetY) {
-                  sprite.y = sprite.targetY;
-                } else {
-                  sprite.y -= dy;
-                }
-              }
+    var halfScreenHeight = $.screenHeight * 0.5;
 
-              if (sprite.targetY == sprite.y) {
-                delete sprite.targetY;
-              }
+    var elMid = top + halfElHeight;
+    var viewportMid = $.scrollY + halfScreenHeight;
 
-              result.y = sprite.y;
-            }
-          }
+    var deltaY = viewportMid - elMid;
+    var position = deltaY <= 0 ? "below" : "above";
 
-          if (!result) {
-            return;
-          }
+    var y = 0;
+    var mult = 1;
 
-          if (!item.draw) {
-            item.draw = [];
-          }
+    if (a.relativeTo === "viewport") {
+      var startY = elMid + halfScreenHeight;
+      var targetY = elMid;
 
-          item.draw.push(function() {
-            item.screen.context.drawImage(
-              self.currentFrame(sprite),
-              result.x + canvasData.halfWidth - (sprite.width / 2),
-              result.y + canvasData.halfHeight  - (sprite.height / 2),
-              sprite.width || sprite.img.naturalWidth,
-              sprite.height || sprite.img.naturalHeight
-            );
-          });
-        });
-      }
-    });
-  }
+      var sfY = (targetY - viewportMid) / (halfScreenHeight + halfElHeight);
+      y = sfY * mult;
+    } else if (a.relativeTo === "center") {
+      var startY = elMid + halfScreenHeight;
+      var targetY = elMid;
 
-  self.currentFrame = function(sprite) {
-    if (!sprite.animation) return sprite.img;
+      var sfY = (targetY - viewportMid) / (halfScreenHeight + halfElHeight);
+      y = sfY * mult;
+    }
 
-    if (!sprite.animation.canvas) {
-      var tempCanvas = document.createElement("canvas");
-      tempCanvas.width = sprite.width;
-      tempCanvas.height = sprite.height;
-      var tempContext = tempCanvas.getContext('2d');
-      sprite.animation.canvas = tempCanvas;
-      sprite.animation.context = tempContext;
-
-      if (!sprite.animation.hasOwnProperty("animationIndex")) {
-        sprite.animation.animationIndex = 0;
+    if (deltaY <= 5 && position !== a.containerPosition &&
+    a.containerPosition && a.containerPosition !== "") {
+      if (typeof(a.onCenter) === "function") {
+        a.onCenter();
       }
     }
 
-    var currAnimation = sprite.animation;
-    if (currAnimation.length) {
-      currAnimation = sprite.animation[currAnimation.animationIndex];
-    }
+    a.containerPosition = position;
 
-    if (!currAnimation.hasOwnProperty("frame")) {
-      currAnimation.frame = 0;
-      currAnimation.lastDraw = Date.now();
-    }
-
-    if (_$.time > currAnimation.lastDraw + currAnimation.duration) {
-      currAnimation.frame++;
-      if (currAnimation.frame >= currAnimation.frames.length) {
-        currAnimation.frame = 0;
-      }
-      currAnimation.lastDraw = _$.time;
-    }
-
-    sprite.animation.context.clearRect(0, 0, sprite.width, sprite.height);
-    sprite.animation.context.drawImage(sprite.img,
-      // Source
-      currAnimation.frames[currAnimation.frame][0] * sprite.width,
-      currAnimation.frames[currAnimation.frame][1] * sprite.height,
-      sprite.width, sprite.height,
-      // Destination
-      0, 0, sprite.width, sprite.height
-    );
-
-    return sprite.animation.canvas;
+    return y;
   }
-
-  self.timeAnimation = function(sprite, canvasData) {
-    var canvas = canvasData.canvas;
-    var context = canvasData.context;
-    var halfCanvasWidth = canvasData.halfWidth;
-    var halfCanvasHeight = canvasData.halfHeight;
-
-    var currAnimation = sprite.time;
-
-    var y = 0; x = 0;
-
-    if (!currAnimation.hasOwnProperty("frame")) {
-      currAnimation.frame = 0;
-
-      currAnimation.currentX = currAnimation.frames[currAnimation.frame][0]
-      * halfCanvasWidth;
-      currAnimation.currentY = currAnimation.frames[currAnimation.frame][1]
-      * halfCanvasHeight;
-
-      currAnimation.targetX = currAnimation.currentX;
-      currAnimation.targetY = currAnimation.currentY;
-    }
-
-    if ( (currAnimation.travelledX >= currAnimation.distanceX &&
-      currAnimation.travelledY >= currAnimation.distanceY) ||
-      (currAnimation.currentX == currAnimation.targetX &&
-      sprite.time.currentY >= currAnimation.targetY)
-    ) {
-      currAnimation.frame++;
-
-      currAnimation.travelledX = 0;
-      currAnimation.travelledY = 0;
-
-      if (currAnimation.frame >= currAnimation.frames.length) {
-        currAnimation.frame = 0;
-        if (!currAnimation.pingpong) {
-          // Snap current x/y to first frame
-          currAnimation.currentX = currAnimation.frames[currAnimation.frame][0]
-          * halfCanvasWidth;
-          currAnimation.currentY = sprite.time.frames[currAnimation.frame][1]
-          * halfCanvasHeight;
-        }
-      }
-
-      if (currAnimation.frames[currAnimation.frame][2] !== undefined && sprite.animation) {
-        sprite.animation.animationIndex = currAnimation.frames[currAnimation.frame][2];
-      }
-
-      var targetX = currAnimation.frames[currAnimation.frame][0]
-        * halfCanvasWidth;
-      var targetY = currAnimation.frames[currAnimation.frame][1]
-        * halfCanvasHeight;
-
-      var distanceX = targetX - currAnimation.currentX;
-      var distanceY = targetY - currAnimation.currentY;
-
-      currAnimation.distanceX = Math.abs(distanceX);
-      currAnimation.distanceY = Math.abs(distanceY);
-
-      currAnimation.dx = (distanceX / currAnimation.duration) * 0.001;
-      currAnimation.dy = (distanceY / currAnimation.duration) * 0.001;
-    }
-
-    var velocityX = _$.dt * currAnimation.dx;
-    var velocityY = _$.dt * currAnimation.dy;
-
-    currAnimation.currentX += velocityX;
-    currAnimation.currentY += velocityY;
-
-    currAnimation.travelledX += Math.abs(velocityX);
-    currAnimation.travelledY += Math.abs(velocityY);
-
-    return { x: currAnimation.currentX, y: currAnimation.currentY }
-  }
-
-  self.mouseAnimation = function(sprite, canvasData) {
-
-  }
-
-  self.scrollAnimation = function(sprite, canvasData) {
-    var canvas = canvasData.canvas;
-    var context = canvasData.context;
-    var halfCanvasWidth = canvasData.halfWidth;
-    var halfCanvasHeight = canvasData.halfHeight;
-
-    var deltaY = (_$.scrollY + (_$.screenHeight * 0.5)) - (canvasData.top + (canvas.offsetHeight * 0.5));
-
-    var direction = deltaY < 0 ? "below" : (deltaY > 0) ? "above" : "center";
-
-    var fromTarget, toTarget, mult;
-    switch (direction) {
-      case "below":
-        fromTarget = sprite.scroll.center;
-        toTarget = sprite.scroll.below;
-        mult = -1;
-        break;
-      case "center":
-        fromTarget = sprite.scroll.center;
-        toTarget = sprite.scroll.center;
-        mult = 0;
-        break;
-      case "above":
-        fromTarget = sprite.scroll.center;
-        toTarget = sprite.scroll.above;
-        mult = 1;
-        break;
-    }
-
-    var distanceScroll = _$.screenHeight / 2;
-    var y = 0; x = 0;
-
-    if (toTarget.hasOwnProperty("y")) {
-      var distancePx = (toTarget.y - fromTarget.y) * halfCanvasHeight;
-      var m = mult * (distancePx / distanceScroll);
-      y = (m * deltaY) + (sprite.scroll.center.y * halfCanvasHeight);
-    }
-
-    if (toTarget.hasOwnProperty("x")) {
-      var distancePx = (toTarget.x - fromTarget.x) * halfCanvasWidth;
-      var m = mult * distancePx / distanceScroll;
-      x = (m * deltaY) + (sprite.scroll.center.x * halfCanvasWidth);
-    }
-
-    return { x: x, y: y }
-  }
-
-  _$.addUpdate(self.update, self.draw);
 
   return self;
-})();
+})( window, 'ax', '$', {} );
