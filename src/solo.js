@@ -51,14 +51,14 @@
   }
 
   $._.getBounds = function() {
-    var bounds = this.getBounds.bounds;
+    var bounds = this._$bounds;
 
-    if (($.time !== this.getBounds.accessed && ($._scrolled || $._resized)) || !bounds) {
+    if (($.time !== this._$accessed && ($._scrolled || $._resized)) || !bounds) {
       bounds = this.getBoundingClientRect();
     }
 
-    this.getBounds.bounds = bounds;
-    this.getBounds.accessed = $.time;
+    this.getBounds._$bounds = bounds;
+    this.getBounds._$accessed = $.time;
 
     return bounds;
   }

@@ -24,30 +24,32 @@
       onExit: animationData.onExit
     };
 
+    var preUpdate = function() {
+      var a = animationData;
+      var el = a.containerEl;
+      var visibility = el.isVisible();
+
+      if (typeof(a.onEnter) === "function") {
+        if (visibility && a.containerVisibility !== visibility) {
+          a.onEnter();
+        }
+      }
+
+      if (typeof(a.onExit) === "function") {
+        if (!visibility && a.containerVisibility !== visibility) {
+          a.onExit();
+        }
+      }
+
+      a.containerVisibility = visibility;
+    }
+
     var updateID = $.addUpdate({
       requirements: {
         scrolled: true,
         visible: animationData.visibleEl
       },
-      preUpdate: function() {
-        var a = animationData;
-        var el = a.containerEl;
-        var visibility = el.isVisible();
-
-        if (typeof(a.onEnter) === "function") {
-          if (visibility && a.containerVisibility !== visibility) {
-            a.onEnter();
-          }
-        }
-
-        if (typeof(a.onExit) === "function") {
-          if (!visibility && a.containerVisibility !== visibility) {
-            a.onExit();
-          }
-        }
-
-        a.containerVisibility = visibility;
-      },
+      preUpdate: (animationData.onEnter || animationData.onExit) ? preUpdate : false,
       draw: function() {
         var relativeY = self._updateScrollAnimation(animation);
         animationData.update(relativeY);

@@ -28,8 +28,7 @@
     <figure><img src="http://lorempixel.com/g/720/720/cats/Placeholder/"/></figure>
   </section>
   <section id="scrolly">Keep scrolling</section>
-  <canvas id="one" width="600" height="315"></canvas>
-  <section>Keep scrolling</section>
+  <section id="colory">Keep scrolling</section>
   <section>Keep scrolling</section>
   <canvas id="two" width="600" height="315"></canvas>
   <section>Keep scrolling</section>
@@ -41,27 +40,46 @@
   <section></section>
   <section></section>
 
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/tinycolor/1.4.1/tinycolor.min.js"></script>
+
   <script type="text/javascript" src="src/solo.js"></script>
   <script type="text/javascript" src="src/axease.js"></script>
 
   <script>
+
+    // TranslateY
+
     var moveEl = $("section figure");
     $.ax.addScrollAnimation({
-      containerEl: $("section#scrolly"),
+      containerEl: $("section"),
       visibleEl: moveEl,
       relativeTo: 'viewport',
       update: function(relativeY) {
-        var y = 60, startY = 0;
+        var y = 80, startY = 0;
         var newY = Math.min(0, startY + (y * relativeY));
         moveEl.style.transform = "translateY(" + newY + "px)";
-      },
-      onEnter: function() {
-        $.log("Enter");
-      },
-      onExit: function() {
-        $.log("Exit");
+
+        var o = 1.75, startO = 1;
+        var newO = Math.max(0, startO - (o * (relativeY * -1)));
+        moveEl.style.opacity = newO;
       }
     });
+
+    // Color lerp
+
+    var startColor = tinycolor("#000");
+    var endColor = tinycolor("#fff");
+    $.ax.addScrollAnimation({
+      containerEl: $("section#colory"),
+      visibleEl: $("section#colory"),
+      relativeTo: 'viewport',
+      update: function(relativeY) {
+        var shift = (Math.min(1, (1 - relativeY)) * 100);
+        var newColor = tinycolor.mix(startColor, endColor, shift);
+        this.containerEl.style["background-color"] = newColor.toRgbString();
+      }
+    });
+
   </script>
 </body>
 </html>
