@@ -41,7 +41,8 @@
   $._ = {};
 
   $._.forEach = function(eachFunc) {
-    if (this.length > 0 && typeof(eachFunc) === "function") {
+    var arr = this;
+    if (arr.length > 0 && typeof(eachFunc) === "function") {
       for (var i = 0; i < arr.length; i++) {
         eachFunc(arr[i], i, arr);
       }
@@ -217,7 +218,7 @@
   // -- Updating
 
   $.time = Date.now();
-  $.fps = !isNaN(options.fps) ? fps : 60;
+  $.fps = !isNaN(options.fps) ? options.fps : 60;
 
   $._updates = [];
   $._accumulator = 0;
@@ -384,4 +385,4 @@
     $._update();
   });
 
-})( window, (!window.hasOwnProperty('$') ? '$' : '_$'), {} );
+})( window, (!window.hasOwnProperty('$') ? '$' : '_$'), { fps: 24 } );

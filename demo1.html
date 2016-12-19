@@ -1,42 +1,69 @@
+<!doctype html>
 <html>
 <head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
   <title>Axease - Demo 1</title>
+
   <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/3.0.3/normalize.min.css">
   <style>
-    section, canvas {
-      width: 100%;
-      height: auto;
-      background-color: #2e102c;
+    html, body {
+      background: black;
     }
     section {
+      border: 0;
+      margin: 0;
+      padding: 0;
+
       display: block;
-      min-height: 40vh;
+      min-height: 60vh;
       overflow: hidden;
+
       font-family: monospace;
       font-weight: bold;
       font-size: 18px;
+
       background-color: rgb(124, 228, 247);
     }
-    section:nth-child(odd) {
-      background-color: rgb(242, 91, 131);
+    .midpoint {
+      position: fixed;
+      top: 50%;
+      width: 100%;
+      height: 0px;
+      border-top: 2px dashed black;
     }
   </style>
 </head>
 <body>
+  <div class="midpoint"></div>
+
   <section>
     <p>Keep scrolling</p>
     <figure><img src="http://lorempixel.com/g/720/720/cats/Placeholder/"/></figure>
   </section>
   <section id="scrolly">Keep scrolling</section>
-  <section id="colory">Keep scrolling</section>
-  <section>Keep scrolling</section>
-  <canvas id="two" width="600" height="315"></canvas>
   <section>Keep scrolling</section>
   <section>Keep scrolling</section>
-  <canvas id="three" width="600" height="315"></canvas>
   <section>Keep scrolling</section>
   <section>Keep scrolling</section>
-  <canvas id="four" width="600" height="315"></canvas>
+  <section>Keep scrolling</section>
+  <section>Keep scrolling</section>
+  <section>Keep scrolling</section>
+  <section>Keep scrolling</section>
+  <section>Keep scrolling</section>
+  <section>Keep scrolling</section>
+  <section>Keep scrolling</section>
+  <section>Keep scrolling</section>
+  <section>Keep scrolling</section>
+  <section>Keep scrolling</section>
+  <section>Keep scrolling</section>
+  <section>Keep scrolling</section>
+  <section>Keep scrolling</section>
+  <section>Keep scrolling</section>
+  <section>Keep scrolling</section>
+  <section>Keep scrolling</section>
+  <section>Keep scrolling</section>
   <section></section>
   <section></section>
 
@@ -53,10 +80,16 @@
     $.ax.addScrollAnimation({
       containerEl: $("section"),
       visibleEl: moveEl,
-      relativeTo: 'viewport',
+      centerEl: null,
+
+      relativeTo: 'viewport', // 'viewport' || 'center'
+      anchor: 'center', // 'top' || 'center' || 'bottom'
+
       update: function(relativeY) {
+        relativeY += 0.25;
+
         var y = 80, startY = 0;
-        var newY = Math.min(0, startY + (y * relativeY));
+        var newY = Math.min(0, startY + (y * (relativeY)));
         moveEl.style.transform = "translateY(" + newY + "px)";
 
         var o = 1.75, startO = 1;
@@ -67,17 +100,26 @@
 
     // Color lerp
 
-    var startColor = tinycolor("#000");
-    var endColor = tinycolor("#fff");
-    $.ax.addScrollAnimation({
-      containerEl: $("section#colory"),
-      visibleEl: $("section#colory"),
-      relativeTo: 'viewport',
-      update: function(relativeY) {
-        var shift = (Math.min(1, (1 - relativeY)) * 100);
-        var newColor = tinycolor.mix(startColor, endColor, shift);
-        this.containerEl.style["background-color"] = newColor.toRgbString();
-      }
+    $(["section"]).forEach(function(el, i) {
+      var startColor = tinycolor("rgb(124, 228, 247)");
+      var endColor = tinycolor("rgb(118, 180, 183)");
+
+      el.style["background-color"] = startColor.toRgbString();
+
+      $.ax.addScrollAnimation({
+        containerEl: el,
+        visibleEl: el,
+
+        relativeTo: 'center',
+        clamp: true,
+        anchor: 'bottom',
+
+        update: function(relativeY) {
+          var shift = (Math.min(1, (1 - relativeY)) * 100);
+          var newColor = tinycolor.mix(startColor, endColor, shift);
+          el.style["background-color"] = newColor.toRgbString();
+        }
+      });
     });
 
   </script>

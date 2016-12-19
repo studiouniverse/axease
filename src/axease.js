@@ -13,6 +13,10 @@
     }
 
     var animation = {
+      clamp: animationData.clamp || false,
+
+      midpoint: animationData.anchor || animationData.midpoint || "center",
+
       relativeTo: animationData.relativeTo || "viewport",
 
       containerEl: animationData.containerEl,
@@ -72,30 +76,41 @@
 
     var halfElWidth = elWidth * 0.5;
     var halfElHeight = elHeight * 0.5;
+    var elMid = top + halfElHeight;
 
     var halfScreenHeight = $.screenHeight * 0.5;
 
-    var elMid = top + halfElHeight;
-    var viewportMid = $.scrollY + halfScreenHeight;
+    var midpointY = $.scrollY; // default to half of viewport
+    switch (a.midpoint) {
+      case "top":
+        break;
+      case "center":
+        midpointY += halfScreenHeight;
+        break;
+      case "bottom":
+        midpointY += $.screenHeight;
+        break;
+    }
 
-    var deltaY = viewportMid - elMid;
+    var deltaY = midpointY - elMid;
     var position = deltaY <= 0 ? "below" : "above";
 
     var y = 0;
     var mult = 1;
+    var offsetY = 0;
 
     if (a.relativeTo === "viewport") {
-      var startY = elMid + halfScreenHeight;
-      var targetY = elMid;
+      offsetY = halfScreenHeight;
+    }
 
-      var sfY = (targetY - viewportMid) / (halfScreenHeight + halfElHeight);
-      y = sfY * mult;
-    } else if (a.relativeTo === "center") {
-      var startY = elMid + halfScreenHeight;
-      var targetY = elMid;
+    var startY = elMid + offsetY;
+    var targetY = elMid;
 
-      var sfY = (targetY - viewportMid) / (halfScreenHeight + halfElHeight);
-      y = sfY * mult;
+    var sfY = (targetY - midpointY) / (offsetY + halfElHeight);
+    y = sfY * mult;
+
+    if (a.clamp) {
+      y = Math.max( -1, Math.min(1, y) );
     }
 
     if (deltaY <= 5 && position !== a.containerPosition &&
