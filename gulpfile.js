@@ -2,7 +2,7 @@ var gulp = require('gulp'),
 uglify = require("gulp-uglify"),
 concat = require("gulp-concat");
 
-var version = "0.2";
+var version = "0.3";
 
 var paths = {
   input_vanilla: 'src/axease.js',

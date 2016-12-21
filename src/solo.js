@@ -236,16 +236,16 @@
     var updateObject = {};
 
     updateObject.id = updateID;
+    updateObject.dirty = true;
     updateObject.interval = updateData.interval || 0;
     updateObject.remaining = updateData.numTimes || -1;
     updateObject.time = 0;
     updateObject.events = {
       resized: true,
-      scrolled: true,
-      visible: false
+      scrolled: true
     };
 
-    updateObject.update = function() {
+    updateObject.preUpdate = function() {
       if ($._scrolled) {
         this.events.scrolled = true;
       }
@@ -257,7 +257,9 @@
       if (updateData.preUpdate) {
         updateData.preUpdate();
       }
+    }
 
+    updateObject.update = function() {
       var validUpdate = true;
       if (updateData.requirements) {
         if (updateData.requirements.visible) {
@@ -265,6 +267,7 @@
             validUpdate = false;
           }
         }
+
         if (updateData.requirements.scrolled && !this.events.scrolled) {
           validUpdate = false;
         }
@@ -316,6 +319,12 @@
       $._updates.push(updateObject);
     }
 
+    if (updateData.run !== false) {
+      if (updateData.preUpdate) updateData.preUpdate();
+      if (updateData.update) updateData.update();
+      if (updateData.draw) updateData.draw();
+    }
+
     return updateID;
   }
 
@@ -354,6 +363,10 @@
 
     $._interval = ((1 / $.fps) * 1000);
 
+    $._updates.forEach(function(updateObject) {
+      updateObject.preUpdate($._interval);
+    });
+
     if (redraw !== true) {
       $._accumulator += $._passed;
       while ($._accumulator >= $._interval) {
@@ -381,8 +394,12 @@
     $._prevTime = now;
   }
 
-  window.addEventListener("load", function() {
+  if (options.waitForLoad !== true) {
     $._update();
-  });
+  } else {
+    window.addEventListener("load", function() {
+      $._update();
+    });
+  }
 
-})( window, (!window.hasOwnProperty('$') ? '$' : '_$'), { fps: 24 } );
+})( window, (!window.hasOwnProperty('$') ? '$' : '_$'));

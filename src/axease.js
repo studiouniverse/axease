@@ -49,6 +49,7 @@
     }
 
     var updateID = $.addUpdate({
+      run: animationData.run || true,
       requirements: {
         scrolled: true,
         visible: animationData.visibleEl
