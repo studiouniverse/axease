@@ -66,17 +66,19 @@ A time animation object has a duration (in seconds). This is how long it should 
 Code/Performance
 -----------
 
-* No onScroll events.
+* No onScroll events
 
-* Scope options, with minimum interference.
+* Uses requestAnimationFrame (with polyfill)
 
-* Updates can be easily configured to increase performance.
+* Scope options, with minimum interference
 
-* requestAnimationFrame + polyfill
+* Takes care of heavy lifting, leaving you to worry about a single generic update function
 
 * Change target fps by modifying $.fps
 
 Future
 ------
 
-* The library will also support mouse animations (when mouse is over canvas at x,y sprites should be at x,y). No real work has been done here yet.
+* Use Mouse position instead of scroll position (relative to containerEl or window)
+
+* Further optimisations

@@ -3,6 +3,126 @@
   var $ = window.___$solo;
   $[_ax] = self;
 
+  // -- Animation
+  self._animations = [];
+
+  self.addAnimation = function(animationData) {
+    if (!animationData || !animationData.frames || !animationData.update) {
+      return;
+    }
+
+    var pingpong = animationData.pingpong;
+    var loop = (animationData.hasOwnProperty("loop") ? animationData.loop : true);
+
+    var animationInterval = ( animationData.hasOwnProperty("duration") && animationData.duration ?
+      ((animationData.duration * 1000) / animationData.frames) :
+      (animationData.interval || 1000) );
+
+    var animation = {
+      loop: loop,
+      pingpong: pingpong,
+
+      frames: animationData.frames,
+      frame: 0,
+      direction: 1,
+      interval: animationInterval,
+
+      visibleEl: animationData.visibleEl,
+
+      update: animationData.update,
+      draw: animationData.draw,
+
+      onEnter: animationData.onEnter,
+      onExit: animationData.onExit,
+
+      onStart: animationData.onStart,
+      onFinish: animationData.onFinish,
+      onRestart: animationData.onRestart,
+      onPingPong: animationData.onPingPong
+    }
+
+    var preUpdate = function() {
+      var a = animation;
+      var el = a.visibleEl;
+
+      if (el) {
+        var visibility = el.isVisible();
+
+        if (typeof(a.onEnter) === "function") {
+          if (visibility && a.visibleElVisibility !== visibility) {
+            a.onEnter();
+          }
+        }
+
+        if (typeof(a.onExit) === "function") {
+          if (!visibility && a.visibleElVisibility !== visibility) {
+            a.onExit();
+          }
+        }
+
+        a.visibleElVisibility = visibility;
+      }
+    }
+
+    var requirements = {};
+    if (animation.visibleEl) {
+      requirements.visible = animation.visibleEl;
+    }
+
+    var updateID = $.addUpdate({
+      remaining: (animation.loop ? -1 : 0),
+      interval: animationInterval,
+      run: false,
+      requirements: requirements,
+      preUpdate: (animation.visibleEl && (animation.onEnter || animation.onExit)) ? preUpdate : false,
+      update: function() {
+        if (animation.started) {
+          if (animation.pingpong) {
+            if (animation.frame <= 0) {
+              animation.direction = 1;
+
+              if (typeof(animation.onRestart) === "function") {
+                animation.onRestart();
+              }
+            }
+          }
+
+          animation.frame += animation.direction;
+
+          if (animation.frame >= animation.frames) {
+            if (animation.pingpong) {
+              animation.frame = animation.frames - 2;
+              animation.direction = -1;
+
+              if (typeof(animation.onPingPong) === "function") {
+                animation.onPingPong();
+              }
+            } else {
+              animation.frame = 0;
+
+              if (typeof(animation.onRestart) === "function") {
+                animation.onRestart();
+              }
+            }
+          }
+        }
+
+        animation.started = true;
+        animation.update(animation.frame);
+        return true;
+      },
+      draw: function() {
+        if (typeof(animation.draw) === "function") {
+          animation.draw(animation.frame);
+        }
+      }
+    });
+
+    animation.updateID = updateID;
+
+    self._animations.push(animation);
+  }
+
   // -- Scrolling
 
   self._scrollAnimations = [];
@@ -19,9 +139,13 @@
 
       relativeTo: animationData.relativeTo || "viewport",
 
+      visibleEl: animationData.visibleEl,
       containerEl: animationData.containerEl,
       containerPosition: "",
       containerVisibility: null,
+
+      update: animationData.update,
+      draw: animationData.draw,
 
       onCenter: animationData.onCenter,
       onEnter: animationData.onEnter,
@@ -29,7 +153,7 @@
     };
 
     var preUpdate = function() {
-      var a = animationData;
+      var a = animation;
       var el = a.containerEl;
       var visibility = el.isVisible();
 
@@ -49,15 +173,15 @@
     }
 
     var updateID = $.addUpdate({
-      run: animationData.run || true,
+      run: (animationData.hasOwnProperty("run") ? animationData.run : true),
       requirements: {
         scrolled: true,
-        visible: animationData.visibleEl
+        visible: animation.visibleEl
       },
-      preUpdate: (animationData.onEnter || animationData.onExit) ? preUpdate : false,
+      preUpdate: (animation.onEnter || animation.onExit) ? preUpdate : false,
       draw: function() {
         var relativeY = self._updateScrollAnimation(animation);
-        animationData.update(relativeY);
+        animation.update(relativeY);
       }
     });
 
