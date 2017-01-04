@@ -7,7 +7,7 @@
   self._animations = [];
 
   self.addAnimation = function(animationData) {
-    if (!animationData || !animationData.frames || !animationData.update) {
+    if (!animationData || !animationData.frames) {
       return;
     }
 
@@ -108,7 +108,9 @@
         }
 
         animation.started = true;
-        animation.update(animation.frame);
+        if (typeof(animation.update) === "function") {
+          animation.update(animation.frame);
+        }
         return true;
       },
       draw: function() {
@@ -181,7 +183,14 @@
       preUpdate: (animation.onEnter || animation.onExit) ? preUpdate : false,
       draw: function() {
         var relativeY = self._updateScrollAnimation(animation);
-        animation.update(relativeY);
+
+        if (typeof(animation.update) === "function") {
+          animation.update(relativeY);
+        }
+
+        if (typeof(animation.draw) === "function") {
+          animation.draw(relativeY);
+        }
       }
     });
 
