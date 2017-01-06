@@ -3,14 +3,9 @@
   var $ = window.___$solo;
   $[_ax] = self;
 
-  // -- Animation
-  self._animations = [];
+  // -- Base
 
-  self.addAnimation = function(animationData) {
-    if (!animationData || !animationData.frames) {
-      return;
-    }
-
+  self._createAnimation = function(animationData) {
     var pingpong = animationData.pingpong;
     var loop = (animationData.hasOwnProperty("loop") ? animationData.loop : true);
 
@@ -19,6 +14,16 @@
       (animationData.interval || 1000) );
 
     var animation = {
+      update: animationData.update,
+      draw: animationData.draw,
+
+      visibleEl: animationData.visibleEl,
+
+      onEnter: animationData.onEnter,
+      onExit: animationData.onExit,
+
+      // Animation vars
+
       loop: loop,
       pingpong: pingpong,
 
@@ -27,19 +32,39 @@
       direction: 1,
       interval: animationInterval,
 
-      visibleEl: animationData.visibleEl,
-
-      update: animationData.update,
-      draw: animationData.draw,
-
-      onEnter: animationData.onEnter,
-      onExit: animationData.onExit,
-
       onStart: animationData.onStart,
       onFinish: animationData.onFinish,
       onRestart: animationData.onRestart,
-      onPingPong: animationData.onPingPong
+      onPingPong: animationData.onPingPong,
+
+      // Scrolling vars
+
+      clamp: animationData.clamp || false,
+
+      midpoint: animationData.anchor || animationData.midpoint || "center",
+
+      relativeTo: animationData.relativeTo || "viewport",
+
+      containerEl: animationData.containerEl,
+      containerPosition: "",
+      containerVisibility: null,
+
+      onCenter: animationData.onCenter
     }
+
+    return animation;
+  }
+
+  // -- Animation
+
+  self._animations = [];
+
+  self.addAnimation = function(animationData) {
+    if (!animationData || !animationData.frames) {
+      return;
+    }
+
+    var animation = self._createAnimation(animationData);
 
     var preUpdate = function() {
       var a = animation;
@@ -71,7 +96,7 @@
 
     var updateID = $.addUpdate({
       remaining: (animation.loop ? -1 : 0),
-      interval: animationInterval,
+      interval: animation.interval,
       run: false,
       requirements: requirements,
       preUpdate: (animation.visibleEl && (animation.onEnter || animation.onExit)) ? preUpdate : false,
@@ -134,25 +159,7 @@
       return;
     }
 
-    var animation = {
-      clamp: animationData.clamp || false,
-
-      midpoint: animationData.anchor || animationData.midpoint || "center",
-
-      relativeTo: animationData.relativeTo || "viewport",
-
-      visibleEl: animationData.visibleEl,
-      containerEl: animationData.containerEl,
-      containerPosition: "",
-      containerVisibility: null,
-
-      update: animationData.update,
-      draw: animationData.draw,
-
-      onCenter: animationData.onCenter,
-      onEnter: animationData.onEnter,
-      onExit: animationData.onExit
-    };
+    var animation = self._createAnimation(animationData);
 
     var preUpdate = function() {
       var a = animation;
@@ -214,6 +221,7 @@
 
     var halfScreenHeight = $.screenHeight * 0.5;
 
+    // TODO if (a.relativeTo === "center") { // allow custom midpoint }
     var midpointY = $.scrollY; // default to half of viewport
     switch (a.midpoint) {
       case "top":
