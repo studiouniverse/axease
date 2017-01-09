@@ -76,30 +76,6 @@
 
     $.fps = 30;
 
-    // TranslateY
-
-    var moveEl = $("section figure");
-    $.ax.addScrollAnimation({
-      containerEl: $("section"),
-      visibleEl: moveEl,
-      centerEl: null,
-
-      relativeTo: 'viewport', // 'viewport' || 'center'
-      anchor: 'center', // 'top' || 'center' || 'bottom'
-
-      update: function(relativeY) {
-        relativeY += 0.25;
-
-        var y = 80, startY = 0;
-        var newY = Math.min(0, startY + (y * (relativeY)));
-        moveEl.style.transform = "translateY(" + newY + "px)";
-
-        var o = 1.75, startO = 1;
-        var newO = Math.max(0, startO - (o * (relativeY * -1)));
-        moveEl.style.opacity = newO;
-      }
-    });
-
     // Color lerp
 
     $(["section"]).forEach(function(el, i) {
@@ -116,7 +92,7 @@
         clamp: true,
         anchor: 'bottom',
 
-        update: function(relativeY) {
+        onScroll: function(relativeY) {
           var shift = (Math.min(1, (1 - relativeY)) * 100);
           var newColor = tinycolor.mix(startColor, endColor, shift);
           el.style["background-color"] = newColor.toRgbString();
@@ -126,16 +102,13 @@
 
     $.ax.addAnimation({
       frames: 10,
-      duration: 10,
+      duration: 1,
 
       loop: true,
-      pingpong: false,
+      pingpong: true,
 
       update: function(frame) {
-
-      },
-      draw: function(frame) {
-
+        // console.log(frame);
       }
     });
 

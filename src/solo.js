@@ -238,7 +238,7 @@
     updateObject.id = updateID;
     updateObject.dirty = true;
     updateObject.interval = updateData.interval || 0;
-    updateObject.remaining = updateData.numTimes || -1;
+    updateObject.remaining = updateData.hasOwnProperty("numTimes") ? updateData.numTimes : -1;
     updateObject.time = 0;
     updateObject.events = {
       resized: true,
@@ -295,10 +295,10 @@
 
       if (this.dirty) {
         this.time = $.time;
-      }
 
-      if (this.remaining > 0) {
-        this.remaining--;
+        if (this.remaining > 0) {
+          this.remaining--;
+        }
       }
     }
 
