@@ -1,6 +1,6 @@
 (function(_ax) {
   var $ = window.___$solo;
-  var self = $;
+  var self = {};
   $[_ax] = self;
 
   // -- Base
