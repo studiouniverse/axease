@@ -15,14 +15,14 @@ var paths = {
 gulp.task('compile-js', function () {
   gulp.src(paths.input_vanilla) // path to your file
   .pipe(concat('axease.' + version + '.js'))
-  .pipe(uglify())
+  // .pipe(uglify())
   .pipe(gulp.dest('build').on('error', console.error.bind(console)));
 });
 
 gulp.task('compile-solo-js', function () {
   gulp.src(paths.input_solo) // path to your file
   .pipe(concat('axease.solo.' + version + '.js'))
-  .pipe(uglify())
+  // .pipe(uglify())
   .pipe(gulp.dest('build').on('error', console.error.bind(console)));
 });
 

@@ -1,1 +1,279 @@
-!function(n){var i=window.___$solo,o=i;return i[n]=o,o._createAnimation=function(n){var i=n.pingpong,o=n.hasOwnProperty("loop")?n.loop:!0,t=n.hasOwnProperty("duration")&&n.duration?1e3*n.duration/n.frames:n.interval||1e3,e={update:n.update,draw:n.draw,onScroll:n.onScroll,onChange:n.onChange,visibleEl:n.visibleEl,onEnter:n.onEnter,onExit:n.onExit,onVisible:n.onVisible,onHidden:n.onHidden,loop:o,pingpong:i,frames:n.frames,frame:0,direction:1,interval:t,onStart:n.onStart,onFinish:n.onFinish,onRestart:n.onRestart,onPingPong:n.onPingPong,flip:n.flip||!1,abs:n.abs||!1,clamp:n.clamp||!1,midpoint:n.anchor||n.midpoint||"center",relativeTo:n.relativeTo||"viewport",containerEl:n.containerEl,containerPosition:"",containerVisibility:null,onCenter:n.onCenter};return e},o._animations=[],o.addAnimation=function(n){if(n&&n.frames){var t=o._createAnimation(n),e={};t.visibleEl&&(e.visible=t.visibleEl);var r=t.onEnter||t.onExit?function(){o._preUpdate(t)}:!1,a=i.addUpdate({numTimes:t.loop?-1:t.pingpong?2*t.frames-1:t.frames,interval:t.interval,run:!1,requirements:e,preUpdate:r,update:function(){return t.started&&(t.pingpong&&t.frame<=0&&(t.direction=1,"function"==typeof t.onRestart&&t.onRestart()),t.frame+=t.direction,t.frame>=t.frames&&(t.pingpong?(t.frame=t.frames-2,t.direction=-1,"function"==typeof t.onPingPong&&t.onPingPong()):(t.frame=0,"function"==typeof t.onRestart&&t.onRestart()))),t.started=!0,"function"==typeof t.update&&t.update(t.frame),!0}});t.updateID=a,o._animations.push(t)}},o._scrollAnimations=[],o.addScrollAnimation=function(n){if(n&&n.containerEl){var t=o._createAnimation(n),e=t.onEnter||t.onExit?function(){o._preUpdate(t)}:!1,r=i.addUpdate({run:n.hasOwnProperty("run")?n.run:!0,requirements:{scrolled:!0,visible:t.visibleEl},preUpdate:e,draw:function(){var n=o._updateScrollAnimation(t);"function"==typeof t.onScroll&&t.onScroll(n)}});t.updateID=r,o._scrollAnimations.push(t)}},o._preUpdate=function(n){var i=n.visibleEl,o=n.containerEl;if(i){var t=i.isVisible();"function"==typeof n.onVisible&&t&&n.visibleElVisibility!==t&&n.onVisible(),"function"==typeof n.onHidden&&(t||n.visibleElVisibility===t||n.onHidden()),n.visibleElVisibility=t}if(o){var t=o.isVisible();"function"==typeof n.onEnter&&t&&n.containerElVisibility!==t&&n.onEnter(),"function"==typeof n.onExit&&(t||n.containerElVisibility===t||n.onExit()),n.containerElVisibility=t}},o._updateScrollAnimation=function(n){var o=n.containerEl,t=o.getTop(),e=o.getBounds(),r=(e.width,e.height),a=.5*r,l=t+a,s=.5*i.screenHeight,c=i.scrollY;switch(n.midpoint){case"top":break;case"center":c+=s;break;case"bottom":c+=i.screenHeight}var p=c-l,f=0>=p?"below":"above",d=0,u=n.flip?-1:1,m=0;"viewport"===n.relativeTo&&(m=s);var b=l,v=(b-c)/(m+a);return d=v*u,n.clamp&&(d=Math.max(-1,Math.min(1,d))),n.abs&&(d=Math.abs(d)),5>=p&&f!==n.containerPosition&&n.containerPosition&&""!==n.containerPosition&&"function"==typeof n.onCenter&&n.onCenter(),n.containerPosition=f,d},o}("ax");
+(function(_ax) {
+  var $ = window.___$solo;
+  var self = $;
+  $[_ax] = self;
+
+  // -- Base
+
+  self._createAnimation = function(animationData) {
+    var pingpong = animationData.pingpong;
+    var loop = (animationData.hasOwnProperty("loop") ? animationData.loop : true);
+
+    var animationInterval = ( animationData.hasOwnProperty("duration") && animationData.duration ?
+      ((animationData.duration * 1000) / animationData.frames) :
+      (animationData.interval || 1000) );
+
+    var animation = {
+      update: animationData.update,
+      draw: animationData.draw,
+
+      onScroll: animationData.onScroll,
+      onChange: animationData.onChange,
+
+      visibleEl: animationData.visibleEl,
+
+      onEnter: animationData.onEnter,
+      onExit: animationData.onExit,
+      onVisible: animationData.onVisible,
+      onHidden: animationData.onHidden,
+
+      // Animation vars
+
+      loop: loop,
+      pingpong: pingpong,
+
+      frames: animationData.frames,
+      frame: 0,
+      direction: 1,
+      interval: animationInterval,
+
+      onStart: animationData.onStart,
+      onFinish: animationData.onFinish,
+      onRestart: animationData.onRestart,
+      onPingPong: animationData.onPingPong,
+
+      // Scrolling vars
+
+      flip: animationData.flip || false,
+      abs: animationData.abs || false,
+      clamp: animationData.clamp || false,
+
+      midpoint: animationData.anchor || animationData.midpoint || "center",
+
+      relativeTo: animationData.relativeTo || "viewport",
+
+      containerEl: animationData.containerEl,
+      containerPosition: "",
+      containerVisibility: null,
+
+      onCenter: animationData.onCenter
+    }
+
+    return animation;
+  }
+
+  // -- Animation
+
+  self._animations = [];
+
+  self.addAnimation = function(animationData) {
+    if (!animationData || !animationData.frames) {
+      return;
+    }
+
+    var animation = self._createAnimation(animationData);
+
+    var requirements = {};
+    if (animation.visibleEl) {
+      requirements.visible = animation.visibleEl;
+    }
+
+    var preUpdate = (animation.onEnter || animation.onExit) ? function() {
+      self._preUpdate(animation);
+    } : false;
+
+    var updateID = $.addUpdate({
+      numTimes: (animation.loop ? -1 : (animation.pingpong ? ((animation.frames * 2) - 1) : animation.frames)),
+      interval: animation.interval,
+      run: false,
+      requirements: requirements,
+      preUpdate: preUpdate,
+      update: function() {
+        if (animation.started) {
+          if (animation.pingpong) {
+            if (animation.frame <= 0) {
+              animation.direction = 1;
+
+              if (typeof(animation.onRestart) === "function") {
+                animation.onRestart();
+              }
+            }
+          }
+
+          animation.frame += animation.direction;
+
+          if (animation.frame >= animation.frames) {
+            if (animation.pingpong) {
+              animation.frame = animation.frames - 2;
+              animation.direction = -1;
+
+              if (typeof(animation.onPingPong) === "function") {
+                animation.onPingPong();
+              }
+            } else {
+              animation.frame = 0;
+
+              if (typeof(animation.onRestart) === "function") {
+                animation.onRestart();
+              }
+            }
+          }
+        }
+
+        animation.started = true;
+        if (typeof(animation.update) === "function") {
+          animation.update(animation.frame);
+        }
+        return true;
+      }
+    });
+
+    animation.updateID = updateID;
+
+    self._animations.push(animation);
+  }
+
+  // -- Scrolling
+
+  self._scrollAnimations = [];
+
+  self.addScrollAnimation = function(animationData) {
+    if (!animationData || !animationData.containerEl) {
+      return;
+    }
+
+    var animation = self._createAnimation(animationData);
+
+    var preUpdate = (animation.onEnter || animation.onExit) ? function() {
+      self._preUpdate(animation);
+    } : false;
+
+    var updateID = $.addUpdate({
+      run: (animationData.hasOwnProperty("run") ? animationData.run : true),
+      requirements: {
+        scrolled: true,
+        visible: animation.visibleEl
+      },
+      preUpdate: preUpdate,
+      draw: function() {
+        var relativeY = self._updateScrollAnimation(animation);
+
+        if (typeof(animation.onScroll) === "function") {
+          animation.onScroll(relativeY);
+        }
+      }
+    });
+
+    animation.updateID = updateID;
+
+    self._scrollAnimations.push(animation);
+  }
+
+  self._preUpdate = function(a) {
+    var visibleEl = a.visibleEl;
+    var containerEl = a.containerEl;
+
+    if (visibleEl) {
+      var visibility = visibleEl.isVisible();
+
+      if (typeof(a.onVisible) === "function") {
+        if (visibility && a.visibleElVisibility !== visibility) {
+          a.onVisible();
+        }
+      }
+
+      if (typeof(a.onHidden) === "function") {
+        if (!visibility && a.visibleElVisibility !== visibility) {
+          a.onHidden();
+        }
+      }
+
+      a.visibleElVisibility = visibility;
+    }
+
+    if (containerEl) {
+      var visibility = containerEl.isVisible();
+
+      if (typeof(a.onEnter) === "function") {
+        if (visibility && a.containerElVisibility !== visibility) {
+          a.onEnter();
+        }
+      }
+
+      if (typeof(a.onExit) === "function") {
+        if (!visibility && a.containerElVisibility !== visibility) {
+          a.onExit();
+        }
+      }
+
+      a.containerElVisibility = visibility;
+    }
+  }
+
+  self._updateScrollAnimation = function(a) {
+    var el = a.containerEl;
+
+    var top = el.getTop();
+    var bounds = el.getBounds();
+
+    var elWidth = bounds.width;
+    var elHeight = bounds.height;
+
+    var halfElWidth = elWidth * 0.5;
+    var halfElHeight = elHeight * 0.5;
+    var elMid = top + halfElHeight;
+
+    var halfScreenHeight = $.screenHeight * 0.5;
+
+    // TODO if (a.relativeTo === "center") { // allow custom midpoint }
+    var midpointY = $.scrollY; // default to half of viewport
+    switch (a.midpoint) {
+      case "top":
+        break;
+      case "center":
+        midpointY += halfScreenHeight;
+        break;
+      case "bottom":
+        midpointY += $.screenHeight;
+        break;
+    }
+
+    var deltaY = midpointY - elMid;
+    var position = deltaY <= 0 ? "below" : "above";
+
+    var y = 0;
+    var mult = a.flip ? -1 : 1;
+    var offsetY = 0;
+
+    if (a.relativeTo === "viewport") {
+      offsetY = halfScreenHeight;
+    }
+
+    var startY = elMid + offsetY;
+    var targetY = elMid;
+
+    var sfY = (targetY - midpointY) / (offsetY + halfElHeight);
+    y = sfY * mult;
+
+    if (a.clamp) {
+      y = Math.max( -1, Math.min(1, y) );
+    }
+
+    if (a.abs) {
+      y = Math.abs(y);
+    }
+
+    if (deltaY <= 5 && position !== a.containerPosition &&
+    a.containerPosition && a.containerPosition !== "") {
+      if (typeof(a.onCenter) === "function") {
+        a.onCenter();
+      }
+    }
+
+    a.containerPosition = position;
+
+    return y;
+  }
+
+  return self;
+})('ax');

@@ -1,1 +1,684 @@
-!function(){window.requestAnimationFrame||(window.requestAnimationFrame=function(){return window.webkitRequestAnimationFrame||window.mozRequestAnimationFrame||window.oRequestAnimationFrame||window.msRequestAnimationFrame||function(e,n){window.setTimeout(e,1e3/60)}}()),Date.now||(Date.now=function(){return(new Date).getTime()})}(),function(e,n,t){var i=function(e){if("string"==typeof e){var n=document.querySelector(e);return i._extendSingleNode(n),n}if("object"==typeof e){if(e.nodeName)return i._extendSingleNode(n),n;if(e.length&&"string"==typeof e[0]){var t=document.querySelectorAll(e);return i._extendMultiNode(t),t}}};e[n]=i,window.___$solo=i,t=t||{},i._={},i._.forEach=function(e){var n=this;if(n.length>0&&"function"==typeof e)for(var t=0;t<n.length;t++)e(n[t],t,n);return this},i._.getBounds=function(){var e=this._$bounds;return(i.time!==this._$accessed&&(i._scrolled||i._resized)||!e)&&(e=this.getBoundingClientRect()),this.getBounds._$bounds=e,this.getBounds._$accessed=i.time,e},i._.getTop=function(){return this.getBounds().top+i.scrollY},i._.isVisible=function(){var e=this.getTop(),n=this.getBounds().height,t=e+n;return i.scrollY+i.screenHeight>=e&&i.scrollY<t},i._.on=function(e,n){for(var t=e.split(" "),i=0;i<t.length;i++)el.addEventListener(t[i],n);return this},i._.off=function(e,n){for(var t=e.split(" "),i=0;i<t.length;i++)el.removeEventListener(t[i],n);return this},i._extendSingleNode=function(e){e&&(e.hasOwnProperty("getBounds")||(e.getBounds=i._.getBounds),e.hasOwnProperty("getTop")||(e.getTop=i._.getTop),e.hasOwnProperty("isVisible")||(e.isVisible=i._.isVisible),e.hasOwnProperty("on")||(e.on=i._.on),e.hasOwnProperty("off")||(e.off=i._.off))},i._extendMultiNode=function(e){e&&(e.hasOwnProperty("forEach")||(e.forEach=i._.forEach),e.hasOwnProperty("on")||(e.on=i._.on),e.hasOwnProperty("off")||(e.off=i._.off),e.forEach(function(e){i._extendSingleNode(e)}))},i.cache={id:0,img:{},log:[]},i.newID=function(){var e=n+"_"+i.cache.id;return i.cache.id++,e},i.log=function(e,n){var t=!0;i.cache.log.length>0&&i.time<i.cache.log[i.cache.log.length-1].datetime+2e3&&(t=!1),t&&console.info(i.time+":"),i.cache.log.push({message:e,e:n,datetime:i.time}),n?console.log(e,n):console.log(e)},i.rest=function(e,n,t,i){t="function"==typeof t?t:function(){},i="function"==typeof i?i:function(){};var o=new XMLHttpRequest;o.open(e||"GET",n,!0),o.onload=function(){if(o.status>=200&&o.status<400){var e=JSON.parse(o.responseText);t(e,o)}else i(o)},o.onerror=function(){i(o)},o.send()},i.scrollY=0,i.screenWidth=0,i.screenHeight=0,i._scrolled=!1,i._resized=!1,i._updateScrollY=function(){return window.scrollY||window.pageYOffset||document.documentElement.scrollTop||document.body.scrollTop},i.time=Date.now(),i.fps=isNaN(t.fps)?60:t.fps,i._updates=[],i._accumulator=0,i._interval=0,i._prevTime=Date.now(),i._passed=0,i.addUpdate=function(e){if(e){var n=i.newID(),t={};return t.id=n,t.dirty=!0,t.interval=e.interval||0,t.remaining=e.hasOwnProperty("numTimes")?e.numTimes:-1,t.time=0,t.events={resized:!0,scrolled:!0},t.preUpdate=function(){i._scrolled&&(this.events.scrolled=!0),i._resized&&(this.events.resized=!0),e.preUpdate&&e.preUpdate()},t.update=function(){var n=!0;if(e.requirements&&(e.requirements.visible&&(e.requirements.visible.isVisible()||(n=!1)),e.requirements.scrolled&&!this.events.scrolled&&(n=!1),e.requirements.resized&&!this.events.resized&&(n=!1)),0!==this.remaining&&i.time>=this.time+this.interval&&n){if(e.update){var t=e.update();"boolean"==typeof t&&(this.dirty=t)}else this.dirty=!0;this.events.scrolled=!1,this.events.resized=!1}this.dirty&&(this.time=i.time,this.remaining>0&&this.remaining--)},t.draw=function(){this.dirty&&e.draw&&e.draw(),this.dirty=!1},t.hasOwnProperty("priority")&&-1===t.priority?i._updates.unshift(t):i._updates.push(t),e.run!==!1&&(e.preUpdate&&e.preUpdate(),e.update&&e.update(),e.draw&&e.draw()),n}},i.redraw=function(){i._theUpdate(!0)},i._update=function(){requestAnimationFrame(function(){i._theUpdate(),i._update()})},i._theUpdate=function(e){var n=Date.now();i.time=n,i._passed=n-i._prevTime,i._resized=window.innerHeight!==i.screenHeight||window.innerWidth!==i.screenWidth,i.screenWidth=window.innerWidth,i.screenHeight=window.innerHeight;var t=i._updateScrollY();if(i._scrolled=i._resized||t!==i.scrollY,i.scrollY=t,i._interval=1/i.fps*1e3,i._updates.forEach(function(e){e.preUpdate(i._interval)}),e!==!0)for(i._accumulator+=i._passed;i._accumulator>=i._interval;)i._updates.forEach(function(e){e.update(i._interval)}),i._accumulator-=i._interval;else i._updates.forEach(function(e){e.update(i._passed)});i._updates.forEach(function(n){e&&(n.dirty=!0),n.draw(i._passed)}),i._prevTime=n},t.waitForLoad!==!0?i._update():window.addEventListener("load",function(){i._update()})}(window,window.jQuery?"_$":"$"),function(e){var n=window.___$solo,t=n;return n[e]=t,t._createAnimation=function(e){var n=e.pingpong,t=e.hasOwnProperty("loop")?e.loop:!0,i=e.hasOwnProperty("duration")&&e.duration?1e3*e.duration/e.frames:e.interval||1e3,o={update:e.update,draw:e.draw,onScroll:e.onScroll,onChange:e.onChange,visibleEl:e.visibleEl,onEnter:e.onEnter,onExit:e.onExit,onVisible:e.onVisible,onHidden:e.onHidden,loop:t,pingpong:n,frames:e.frames,frame:0,direction:1,interval:i,onStart:e.onStart,onFinish:e.onFinish,onRestart:e.onRestart,onPingPong:e.onPingPong,flip:e.flip||!1,abs:e.abs||!1,clamp:e.clamp||!1,midpoint:e.anchor||e.midpoint||"center",relativeTo:e.relativeTo||"viewport",containerEl:e.containerEl,containerPosition:"",containerVisibility:null,onCenter:e.onCenter};return o},t._animations=[],t.addAnimation=function(e){if(e&&e.frames){var i=t._createAnimation(e),o={};i.visibleEl&&(o.visible=i.visibleEl);var r=i.onEnter||i.onExit?function(){t._preUpdate(i)}:!1,a=n.addUpdate({numTimes:i.loop?-1:i.pingpong?2*i.frames-1:i.frames,interval:i.interval,run:!1,requirements:o,preUpdate:r,update:function(){return i.started&&(i.pingpong&&i.frame<=0&&(i.direction=1,"function"==typeof i.onRestart&&i.onRestart()),i.frame+=i.direction,i.frame>=i.frames&&(i.pingpong?(i.frame=i.frames-2,i.direction=-1,"function"==typeof i.onPingPong&&i.onPingPong()):(i.frame=0,"function"==typeof i.onRestart&&i.onRestart()))),i.started=!0,"function"==typeof i.update&&i.update(i.frame),!0}});i.updateID=a,t._animations.push(i)}},t._scrollAnimations=[],t.addScrollAnimation=function(e){if(e&&e.containerEl){var i=t._createAnimation(e),o=i.onEnter||i.onExit?function(){t._preUpdate(i)}:!1,r=n.addUpdate({run:e.hasOwnProperty("run")?e.run:!0,requirements:{scrolled:!0,visible:i.visibleEl},preUpdate:o,draw:function(){var e=t._updateScrollAnimation(i);"function"==typeof i.onScroll&&i.onScroll(e)}});i.updateID=r,t._scrollAnimations.push(i)}},t._preUpdate=function(e){var n=e.visibleEl,t=e.containerEl;if(n){var i=n.isVisible();"function"==typeof e.onVisible&&i&&e.visibleElVisibility!==i&&e.onVisible(),"function"==typeof e.onHidden&&(i||e.visibleElVisibility===i||e.onHidden()),e.visibleElVisibility=i}if(t){var i=t.isVisible();"function"==typeof e.onEnter&&i&&e.containerElVisibility!==i&&e.onEnter(),"function"==typeof e.onExit&&(i||e.containerElVisibility===i||e.onExit()),e.containerElVisibility=i}},t._updateScrollAnimation=function(e){var t=e.containerEl,i=t.getTop(),o=t.getBounds(),r=(o.width,o.height),a=.5*r,s=i+a,d=.5*n.screenHeight,l=n.scrollY;switch(e.midpoint){case"top":break;case"center":l+=d;break;case"bottom":l+=n.screenHeight}var c=l-s,u=0>=c?"below":"above",p=0,f=e.flip?-1:1,m=0;"viewport"===e.relativeTo&&(m=d);var h=s,_=(h-l)/(m+a);return p=_*f,e.clamp&&(p=Math.max(-1,Math.min(1,p))),e.abs&&(p=Math.abs(p)),5>=c&&u!==e.containerPosition&&e.containerPosition&&""!==e.containerPosition&&"function"==typeof e.onCenter&&e.onCenter(),e.containerPosition=u,p},t}("ax");
+// -- Polyfills
+
+(function() {
+  if (!window.requestAnimationFrame) { window.requestAnimationFrame = (function() { return window.webkitRequestAnimationFrame || window.mozRequestAnimationFrame || window.oRequestAnimationFrame || window.msRequestAnimationFrame ||
+    function(callback, element ) { window.setTimeout( callback, 1000 / 60 ); }; })(); }
+
+  if (!Date.now) { Date.now = function now(){ return new Date().getTime(); } }
+})();
+
+// -- Solo
+
+(function(_scope, _solo, options) {
+
+  var $ = function(query) {
+    // Pass in an array to look for multiple elements
+    // Pass in a string to get the first element
+
+    if (typeof(query) === "string") {
+      var el = document.querySelector(query);
+      $._extendSingleNode(el);
+      return el;
+    } else if (typeof(query) === "object") {
+      if (query.nodeName) {
+        $._extendSingleNode(el);
+        return el;
+      } else if (query.length && typeof(query[0]) === "string") {
+        var elArr = document.querySelectorAll(query);
+        $._extendMultiNode(elArr);
+        return elArr;
+      }
+    }
+  }
+
+  _scope[_solo] = $;
+  window.___$solo = $;
+
+  options = options || {};
+
+  // -- Plugs
+
+  $._ = {};
+
+  $._.forEach = function(eachFunc) {
+    var arr = this;
+    if (arr.length > 0 && typeof(eachFunc) === "function") {
+      for (var i = 0; i < arr.length; i++) {
+        eachFunc(arr[i], i, arr);
+      }
+    }
+
+    return this;
+  }
+
+  $._.getBounds = function() {
+    var bounds = this._$bounds;
+
+    if (($.time !== this._$accessed && ($._scrolled || $._resized)) || !bounds) {
+      bounds = this.getBoundingClientRect();
+    }
+
+    this.getBounds._$bounds = bounds;
+    this.getBounds._$accessed = $.time;
+
+    return bounds;
+  }
+
+  $._.getTop = function() {
+    return this.getBounds().top + $.scrollY;
+  }
+
+  $._.isVisible = function() {
+    var top = this.getTop();
+    var height = this.getBounds().height;
+    var bottom = top + height;
+    return $.scrollY + $.screenHeight >= top && $.scrollY < bottom;
+  }
+
+  $._.on = function(_events, callback) {
+    var events = _events.split(" ");
+
+    for (var i = 0; i < events.length; i++) {
+      el.addEventListener(events[i], callback);
+    }
+
+    return this;
+  }
+
+  $._.off = function(_events, callback) {
+    var events = _events.split(" ");
+
+    for (var i = 0; i < events.length; i++) {
+      el.removeEventListener(events[i], callback);
+    }
+
+    return this;
+  }
+
+  $._extendSingleNode = function(el) {
+    if (el) {
+      if (!el.hasOwnProperty("getBounds")) {
+        el.getBounds = $._.getBounds;
+      }
+
+      if (!el.hasOwnProperty("getTop")) {
+        el.getTop = $._.getTop;
+      }
+
+      if (!el.hasOwnProperty("isVisible")) {
+        el.isVisible = $._.isVisible;
+      }
+
+      if (!el.hasOwnProperty("on")) {
+        el.on = $._.on;
+      }
+
+      if (!el.hasOwnProperty("off")) {
+        el.off = $._.off;
+      }
+    }
+  }
+
+  $._extendMultiNode = function(elArr) {
+    if (elArr) {
+      if (!elArr.hasOwnProperty("forEach")) {
+        elArr.forEach = $._.forEach;
+      }
+
+      if (!elArr.hasOwnProperty("on")) {
+        elArr.on = $._.on;
+      }
+
+      if (!elArr.hasOwnProperty("off")) {
+        elArr.off = $._.off;
+      }
+
+      elArr.forEach(function(node) {
+        $._extendSingleNode(node);
+      });
+    }
+  }
+
+  // -- Cache
+
+  $.cache = { id: 0, img: {}, log: [] };
+
+  // -- Debugging
+
+  $.newID = function() {
+    var newID = _solo + "_" + $.cache.id;
+    $.cache.id++;
+    return newID;
+  }
+
+  $.log = function(message, e) {
+    var showTimestamp = true;
+
+    if ($.cache.log.length > 0) {
+      if ($.time < $.cache.log[$.cache.log.length - 1].datetime + 2000) {
+        showTimestamp = false;
+      }
+    }
+
+    if (showTimestamp) {
+      console.info($.time + ":");
+    }
+
+    $.cache.log.push({
+      message: message,
+      e: e,
+      datetime: $.time
+    });
+
+    if (e) {
+      console.log(message, e);
+    } else {
+      console.log(message);
+    }
+  }
+
+  // -- Communications
+
+  $.rest = function(method, url, success, error) {
+    success = typeof success == "function" ? success : function(){};
+    error = typeof error == "function" ? error : function(){};
+
+    var request = new XMLHttpRequest();
+    request.open(method || 'GET', url, true);
+
+    request.onload = function() {
+      if (request.status >= 200 && request.status < 400) {
+        var data = JSON.parse(request.responseText);
+        success(data, request);
+      } else {
+        error(request);
+      }
+    }
+
+    request.onerror = function() {
+      error(request);
+    }
+
+    request.send();
+  }
+
+  // -- Window
+
+  $.scrollY = 0;
+  $.screenWidth = 0;
+  $.screenHeight = 0;
+
+  $._scrolled = false;
+  $._resized = false;
+
+  $._updateScrollY = function() {
+    return window.scrollY || window.pageYOffset || document.documentElement.scrollTop || document.body.scrollTop;
+  }
+
+  // -- Updating
+
+  $.time = Date.now();
+  $.fps = !isNaN(options.fps) ? options.fps : 60;
+
+  $._updates = [];
+  $._accumulator = 0;
+  $._interval = 0;
+
+  $._prevTime = Date.now();
+  $._passed = 0;
+
+  $.addUpdate = function(updateData) {
+    if (!updateData) {
+      return;
+    }
+
+    var updateID = $.newID();
+    var updateObject = {};
+
+    updateObject.id = updateID;
+    updateObject.dirty = true;
+    updateObject.interval = updateData.interval || 0;
+    updateObject.remaining = updateData.hasOwnProperty("numTimes") ? updateData.numTimes : -1;
+    updateObject.time = 0;
+    updateObject.events = {
+      resized: true,
+      scrolled: true
+    };
+
+    updateObject.preUpdate = function() {
+      if ($._scrolled) {
+        this.events.scrolled = true;
+      }
+
+      if ($._resized) {
+        this.events.resized = true;
+      }
+
+      if (updateData.preUpdate) {
+        updateData.preUpdate();
+      }
+    }
+
+    updateObject.update = function() {
+      var validUpdate = true;
+      if (updateData.requirements) {
+        if (updateData.requirements.visible) {
+          if (!updateData.requirements.visible.isVisible()) {
+            validUpdate = false;
+          }
+        }
+
+        if (updateData.requirements.scrolled && !this.events.scrolled) {
+          validUpdate = false;
+        }
+
+        if (updateData.requirements.resized && !this.events.resized) {
+          validUpdate = false;
+        }
+      }
+
+      if (this.remaining !== 0 &&
+      $.time >= this.time + this.interval &&
+      validUpdate) {
+        if (updateData.update) {
+          var output = updateData.update();
+          if (typeof(output) === "boolean") {
+            this.dirty = output;
+          }
+        } else {
+          this.dirty = true;
+        }
+
+        this.events.scrolled = false;
+        this.events.resized = false;
+      }
+
+      if (this.dirty) {
+        this.time = $.time;
+
+        if (this.remaining > 0) {
+          this.remaining--;
+        }
+      }
+    }
+
+    updateObject.draw = function() {
+      if (this.dirty && updateData.draw) {
+        updateData.draw();
+      }
+      this.dirty = false;
+    }
+
+    if (updateObject.hasOwnProperty("priority")) {
+      if (updateObject.priority === -1) {
+        $._updates.unshift(updateObject);
+      } else {
+        $._updates.push(updateObject);
+      }
+    } else {
+      $._updates.push(updateObject);
+    }
+
+    if (updateData.run !== false) {
+      if (updateData.preUpdate) updateData.preUpdate();
+      if (updateData.update) updateData.update();
+      if (updateData.draw) updateData.draw();
+    }
+
+    return updateID;
+  }
+
+  $.redraw = function() {
+    $._theUpdate(true);
+  }
+
+  $._update = function() {
+    requestAnimationFrame(function() {
+      $._theUpdate();
+      $._update();
+    });
+  }
+
+  $._theUpdate = function(redraw) {
+
+    // Time
+
+    var now = Date.now();
+    $.time = now;
+    $._passed = now - $._prevTime;
+
+    // Dimensions
+
+    $._resized = window.innerHeight !== $.screenHeight || window.innerWidth !== $.screenWidth;
+    $.screenWidth = window.innerWidth;
+    $.screenHeight = window.innerHeight;
+
+    // Scroll
+
+    var scrollY = $._updateScrollY();
+    $._scrolled = $._resized || scrollY !== $.scrollY;
+    $.scrollY = scrollY;
+
+    // Updates
+
+    $._interval = ((1 / $.fps) * 1000);
+
+    $._updates.forEach(function(updateObject) {
+      updateObject.preUpdate($._interval);
+    });
+
+    if (redraw !== true) {
+      $._accumulator += $._passed;
+      while ($._accumulator >= $._interval) {
+        $._updates.forEach(function(updateObject) {
+          updateObject.update($._interval);
+        });
+
+        $._accumulator -= $._interval;
+      }
+    } else {
+      $._updates.forEach(function(updateObject) {
+        updateObject.update($._passed);
+      });
+    }
+
+    $._updates.forEach(function(updateObject) {
+      if (redraw) {
+        updateObject.dirty = true;
+      }
+      updateObject.draw($._passed);
+    });
+
+    // Clean up
+
+    $._prevTime = now;
+  }
+
+  if (options.waitForLoad !== true) {
+    $._update();
+  } else {
+    window.addEventListener("load", function() {
+      $._update();
+    });
+  }
+
+})( window, (!window.hasOwnProperty('$') ? '$' : '_$'));
+(function(_ax) {
+  var $ = window.___$solo;
+  var self = $;
+  $[_ax] = self;
+
+  // -- Base
+
+  self._createAnimation = function(animationData) {
+    var pingpong = animationData.pingpong;
+    var loop = (animationData.hasOwnProperty("loop") ? animationData.loop : true);
+
+    var animationInterval = ( animationData.hasOwnProperty("duration") && animationData.duration ?
+      ((animationData.duration * 1000) / animationData.frames) :
+      (animationData.interval || 1000) );
+
+    var animation = {
+      update: animationData.update,
+      draw: animationData.draw,
+
+      onScroll: animationData.onScroll,
+      onChange: animationData.onChange,
+
+      visibleEl: animationData.visibleEl,
+
+      onEnter: animationData.onEnter,
+      onExit: animationData.onExit,
+      onVisible: animationData.onVisible,
+      onHidden: animationData.onHidden,
+
+      // Animation vars
+
+      loop: loop,
+      pingpong: pingpong,
+
+      frames: animationData.frames,
+      frame: 0,
+      direction: 1,
+      interval: animationInterval,
+
+      onStart: animationData.onStart,
+      onFinish: animationData.onFinish,
+      onRestart: animationData.onRestart,
+      onPingPong: animationData.onPingPong,
+
+      // Scrolling vars
+
+      flip: animationData.flip || false,
+      abs: animationData.abs || false,
+      clamp: animationData.clamp || false,
+
+      midpoint: animationData.anchor || animationData.midpoint || "center",
+
+      relativeTo: animationData.relativeTo || "viewport",
+
+      containerEl: animationData.containerEl,
+      containerPosition: "",
+      containerVisibility: null,
+
+      onCenter: animationData.onCenter
+    }
+
+    return animation;
+  }
+
+  // -- Animation
+
+  self._animations = [];
+
+  self.addAnimation = function(animationData) {
+    if (!animationData || !animationData.frames) {
+      return;
+    }
+
+    var animation = self._createAnimation(animationData);
+
+    var requirements = {};
+    if (animation.visibleEl) {
+      requirements.visible = animation.visibleEl;
+    }
+
+    var preUpdate = (animation.onEnter || animation.onExit) ? function() {
+      self._preUpdate(animation);
+    } : false;
+
+    var updateID = $.addUpdate({
+      numTimes: (animation.loop ? -1 : (animation.pingpong ? ((animation.frames * 2) - 1) : animation.frames)),
+      interval: animation.interval,
+      run: false,
+      requirements: requirements,
+      preUpdate: preUpdate,
+      update: function() {
+        if (animation.started) {
+          if (animation.pingpong) {
+            if (animation.frame <= 0) {
+              animation.direction = 1;
+
+              if (typeof(animation.onRestart) === "function") {
+                animation.onRestart();
+              }
+            }
+          }
+
+          animation.frame += animation.direction;
+
+          if (animation.frame >= animation.frames) {
+            if (animation.pingpong) {
+              animation.frame = animation.frames - 2;
+              animation.direction = -1;
+
+              if (typeof(animation.onPingPong) === "function") {
+                animation.onPingPong();
+              }
+            } else {
+              animation.frame = 0;
+
+              if (typeof(animation.onRestart) === "function") {
+                animation.onRestart();
+              }
+            }
+          }
+        }
+
+        animation.started = true;
+        if (typeof(animation.update) === "function") {
+          animation.update(animation.frame);
+        }
+        return true;
+      }
+    });
+
+    animation.updateID = updateID;
+
+    self._animations.push(animation);
+  }
+
+  // -- Scrolling
+
+  self._scrollAnimations = [];
+
+  self.addScrollAnimation = function(animationData) {
+    if (!animationData || !animationData.containerEl) {
+      return;
+    }
+
+    var animation = self._createAnimation(animationData);
+
+    var preUpdate = (animation.onEnter || animation.onExit) ? function() {
+      self._preUpdate(animation);
+    } : false;
+
+    var updateID = $.addUpdate({
+      run: (animationData.hasOwnProperty("run") ? animationData.run : true),
+      requirements: {
+        scrolled: true,
+        visible: animation.visibleEl
+      },
+      preUpdate: preUpdate,
+      draw: function() {
+        var relativeY = self._updateScrollAnimation(animation);
+
+        if (typeof(animation.onScroll) === "function") {
+          animation.onScroll(relativeY);
+        }
+      }
+    });
+
+    animation.updateID = updateID;
+
+    self._scrollAnimations.push(animation);
+  }
+
+  self._preUpdate = function(a) {
+    var visibleEl = a.visibleEl;
+    var containerEl = a.containerEl;
+
+    if (visibleEl) {
+      var visibility = visibleEl.isVisible();
+
+      if (typeof(a.onVisible) === "function") {
+        if (visibility && a.visibleElVisibility !== visibility) {
+          a.onVisible();
+        }
+      }
+
+      if (typeof(a.onHidden) === "function") {
+        if (!visibility && a.visibleElVisibility !== visibility) {
+          a.onHidden();
+        }
+      }
+
+      a.visibleElVisibility = visibility;
+    }
+
+    if (containerEl) {
+      var visibility = containerEl.isVisible();
+
+      if (typeof(a.onEnter) === "function") {
+        if (visibility && a.containerElVisibility !== visibility) {
+          a.onEnter();
+        }
+      }
+
+      if (typeof(a.onExit) === "function") {
+        if (!visibility && a.containerElVisibility !== visibility) {
+          a.onExit();
+        }
+      }
+
+      a.containerElVisibility = visibility;
+    }
+  }
+
+  self._updateScrollAnimation = function(a) {
+    var el = a.containerEl;
+
+    var top = el.getTop();
+    var bounds = el.getBounds();
+
+    var elWidth = bounds.width;
+    var elHeight = bounds.height;
+
+    var halfElWidth = elWidth * 0.5;
+    var halfElHeight = elHeight * 0.5;
+    var elMid = top + halfElHeight;
+
+    var halfScreenHeight = $.screenHeight * 0.5;
+
+    // TODO if (a.relativeTo === "center") { // allow custom midpoint }
+    var midpointY = $.scrollY; // default to half of viewport
+    switch (a.midpoint) {
+      case "top":
+        break;
+      case "center":
+        midpointY += halfScreenHeight;
+        break;
+      case "bottom":
+        midpointY += $.screenHeight;
+        break;
+    }
+
+    var deltaY = midpointY - elMid;
+    var position = deltaY <= 0 ? "below" : "above";
+
+    var y = 0;
+    var mult = a.flip ? -1 : 1;
+    var offsetY = 0;
+
+    if (a.relativeTo === "viewport") {
+      offsetY = halfScreenHeight;
+    }
+
+    var startY = elMid + offsetY;
+    var targetY = elMid;
+
+    var sfY = (targetY - midpointY) / (offsetY + halfElHeight);
+    y = sfY * mult;
+
+    if (a.clamp) {
+      y = Math.max( -1, Math.min(1, y) );
+    }
+
+    if (a.abs) {
+      y = Math.abs(y);
+    }
+
+    if (deltaY <= 5 && position !== a.containerPosition &&
+    a.containerPosition && a.containerPosition !== "") {
+      if (typeof(a.onCenter) === "function") {
+        a.onCenter();
+      }
+    }
+
+    a.containerPosition = position;
+
+    return y;
+  }
+
+  return self;
+})('ax');

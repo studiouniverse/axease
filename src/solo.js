@@ -402,4 +402,4 @@
     });
   }
 
-})( window, (!window.jQuery ? '$' : '_$'));
+})( window, (!window.hasOwnProperty('$') ? '$' : '_$'));
