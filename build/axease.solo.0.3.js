@@ -419,6 +419,7 @@
       (animationData.interval || 1000) );
 
     var animation = {
+      preUpdate: animationData.preUpdate,
       update: animationData.update,
       draw: animationData.draw,
 
@@ -549,7 +550,7 @@
 
     var animation = self._createAnimation(animationData);
 
-    var preUpdate = (animation.onEnter || animation.onExit) ? function() {
+    var preUpdate = (animation.onEnter || animation.onExit || animation.preUpdate) ? function() {
       self._preUpdate(animation);
     } : false;
 
@@ -560,11 +561,22 @@
         visible: animation.visibleEl
       },
       preUpdate: preUpdate,
-      draw: function() {
+      update: function() {
         var relativeY = self._updateScrollAnimation(animation);
+
+        if (typeof(animation.update) === "function") {
+          animation.update(relativeY);
+        }
 
         if (typeof(animation.onScroll) === "function") {
           animation.onScroll(relativeY);
+        }
+
+        return true;
+      },
+      draw: function() {
+        if (typeof(animation.draw) === "function") {
+          animation.draw(animation.relativeY);
         }
       }
     });
@@ -578,8 +590,13 @@
     var visibleEl = a.visibleEl;
     var containerEl = a.containerEl;
 
+    var visibility = true;
+
     if (visibleEl) {
-      var visibility = visibleEl.isVisible();
+      var visibleElVisibility = visibleEl.isVisible();
+      if (!visibleElVisibility) {
+        visibility = false;
+      }
 
       if (typeof(a.onVisible) === "function") {
         if (visibility && a.visibleElVisibility !== visibility) {
@@ -597,21 +614,25 @@
     }
 
     if (containerEl) {
-      var visibility = containerEl.isVisible();
+      var containerElVisibility = containerEl.isVisible();
 
       if (typeof(a.onEnter) === "function") {
-        if (visibility && a.containerElVisibility !== visibility) {
+        if (containerElVisibility && a.containerElVisibility !== containerElVisibility) {
           a.onEnter();
         }
       }
 
       if (typeof(a.onExit) === "function") {
-        if (!visibility && a.containerElVisibility !== visibility) {
+        if (!containerElVisibility && a.containerElVisibility !== containerElVisibility) {
           a.onExit();
         }
       }
 
       a.containerElVisibility = visibility;
+    }
+
+    if (visibility && typeof(a.preUpdate) === "function") {
+      a.preUpdate();
     }
   }
 
@@ -676,6 +697,7 @@
     }
 
     a.containerPosition = position;
+    a.relativeY = y;
 
     return y;
   }

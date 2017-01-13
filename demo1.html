@@ -92,7 +92,7 @@
         clamp: true,
         anchor: 'bottom',
 
-        onScroll: function(relativeY) {
+        draw: function(relativeY) {
           var shift = (Math.min(1, (1 - relativeY)) * 100);
           var newColor = tinycolor.mix(startColor, endColor, shift);
           el.style["background-color"] = newColor.toRgbString();
